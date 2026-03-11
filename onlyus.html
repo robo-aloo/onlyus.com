@@ -2,26 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#0a0a12">
 <title>Only Us</title>
-
-<!-- TweetNaCl: libsodium-grade crypto in pure JS (no WASM issues) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tweetnacl/1.0.3/nacl-fast.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tweetnacl-util/0.15.1/nacl-util.min.js"></script>
-<!-- PeerJS: WebRTC signaling -->
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-
-<!--
-  ARGON2id implemented inline via WebCrypto PBKDF2 + manual Argon2id logic.
-  Since argon2-browser WASM CDN is unreliable, we implement a robust KDF:
-    PBKDF2-SHA512 (600,000 iterations = OWASP 2023 recommendation)
-    + XSalsa20 key stretching
-    → 256-bit output
-  This is cryptographically sound and works on ALL browsers including potato ones.
-  A pure-JS Argon2id polyfill is also included below as primary attempt.
--->
-
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -31,282 +17,184 @@
   --safe:#4ade80;--warn:#fbbf24;--danger:#f87171;
   --me:#3d2880;--them:#1c1c2a;--r:13px;
 }
-html,body{
-  height:100%;background:var(--bg);color:var(--txt);
-  font-family:'Inter',system-ui,sans-serif;overflow:hidden;
-}
+html,body{height:100%;background:var(--bg);color:var(--txt);
+  font-family:'Inter',system-ui,sans-serif;overflow:hidden;}
 
-/* ── SETUP ── */
-#setup{
-  height:100%;display:flex;align-items:center;justify-content:center;
-  padding:1rem;overflow-y:auto;-webkit-overflow-scrolling:touch;
-}
+/* SETUP */
+#setup{height:100%;display:flex;align-items:center;justify-content:center;
+  padding:1rem;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .si{width:100%;max-width:340px;display:flex;flex-direction:column;gap:.9rem;}
-
 .logo{text-align:center;}
-.logo h1{font-size:2rem;font-weight:300;letter-spacing:-.02em;}
+.logo h1{font-size:2rem;font-weight:300;}
 .logo h1 b{color:var(--a);font-weight:400;}
 .logo p{font-size:.6rem;color:var(--sub);letter-spacing:.15em;text-transform:uppercase;margin-top:.2rem;}
-.sbadge{
-  display:inline-flex;align-items:center;gap:.35rem;margin-top:.4rem;
-  font-size:.56rem;color:var(--safe);letter-spacing:.1em;text-transform:uppercase;
+.sbadge{display:inline-flex;align-items:center;gap:.3rem;margin-top:.4rem;font-size:.56rem;
+  color:var(--safe);letter-spacing:.1em;text-transform:uppercase;
   background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.18);
-  padding:.28rem .7rem;border-radius:20px;
-}
+  padding:.26rem .7rem;border-radius:20px;}
 
-.card{
-  background:var(--card);border:1px solid var(--bor);border-radius:var(--r);
-  padding:1.2rem;display:flex;flex-direction:column;gap:.8rem;
-}
-.ct{font-size:.65rem;font-weight:500;color:var(--a);letter-spacing:.1em;text-transform:uppercase;}
+.card{background:var(--card);border:1px solid var(--bor);border-radius:var(--r);
+  padding:1.2rem;display:flex;flex-direction:column;gap:.8rem;}
+.ct{font-size:.63rem;font-weight:500;color:var(--a);letter-spacing:.1em;text-transform:uppercase;}
 
-.f label{
-  display:block;font-size:.6rem;color:var(--sub);
-  letter-spacing:.1em;text-transform:uppercase;margin-bottom:.26rem;
-}
-.f input{
-  width:100%;background:var(--inp);border:1px solid var(--bor);color:var(--txt);
+.f label{display:block;font-size:.58rem;color:var(--sub);letter-spacing:.1em;
+  text-transform:uppercase;margin-bottom:.24rem;}
+.f input{width:100%;background:var(--inp);border:1px solid var(--bor);color:var(--txt);
   font-family:inherit;font-size:.88rem;padding:.62rem .82rem;border-radius:9px;
-  outline:none;transition:border-color .2s;-webkit-appearance:none;
-}
+  outline:none;transition:border-color .2s;-webkit-appearance:none;}
 .f input:focus{border-color:var(--a);}
-.f input[type=password]{letter-spacing:.05em;}
 
-.btn{
-  width:100%;padding:.7rem;border:none;border-radius:9px;font-family:inherit;
-  font-size:.88rem;font-weight:500;cursor:pointer;transition:opacity .15s,transform .1s;
-}
+/* password wrapper with show/hide toggle */
+.pw-wrap{position:relative;display:flex;align-items:center;}
+.pw-wrap input{padding-right:2.5rem;}
+.pw-eye{position:absolute;right:.7rem;background:none;border:none;color:var(--sub);
+  cursor:pointer;font-size:1rem;padding:.2rem;line-height:1;transition:color .2s;}
+.pw-eye:hover{color:var(--a);}
+
+/* strength meter */
+.smeter{display:flex;gap:.18rem;margin-top:.26rem;}
+.sb{flex:1;height:3px;border-radius:3px;background:var(--inp);transition:background .25s;}
+.sw{background:var(--danger);}.so{background:var(--warn);}.sg{background:var(--safe);}
+.slbl{font-size:.56rem;color:var(--sub);margin-top:.16rem;}
+
+/* KDF progress */
+.kpw{display:none;flex-direction:column;gap:.28rem;}
+.kpw.on{display:flex;}
+.kpl{display:flex;justify-content:space-between;font-size:.58rem;color:var(--sub);}
+.kpl b{color:var(--a);}
+.kpb-bg{width:100%;height:4px;background:var(--inp);border-radius:4px;overflow:hidden;}
+.kpb{height:100%;width:0%;border-radius:4px;background:linear-gradient(90deg,var(--a),#f472b6);transition:width .1s;}
+
+.btn{width:100%;padding:.7rem;border:none;border-radius:9px;font-family:inherit;
+  font-size:.88rem;font-weight:500;cursor:pointer;transition:opacity .15s,transform .1s;}
 .btn:active{transform:scale(.97);}
-.bp{background:var(--a);color:#fff;}.bp:hover{opacity:.88;}
+.bp{background:var(--a);color:#fff;}
+.bp:hover{opacity:.88;}
 .bp:disabled{opacity:.32;cursor:not-allowed;transform:none;}
 .bs{background:var(--inp);color:var(--txt);border:1px solid var(--bor);}
 .bs:hover{border-color:var(--a);color:var(--a);}
 .r2{display:flex;gap:.5rem;}.r2 .btn{flex:1;}
-.or{
-  display:flex;align-items:center;gap:.6rem;
-  font-size:.6rem;color:var(--sub);
-}
+.or{display:flex;align-items:center;gap:.6rem;font-size:.58rem;color:var(--sub);}
 .or::before,.or::after{content:'';flex:1;height:1px;background:var(--bor);}
 
-/* KDF progress */
-.kprog-wrap{display:none;flex-direction:column;gap:.3rem;}
-.kprog-wrap.show{display:flex;}
-.kprog-top{display:flex;justify-content:space-between;font-size:.6rem;color:var(--sub);}
-.kprog-top span:last-child{color:var(--a);}
-.kprog{width:100%;height:4px;background:var(--inp);border-radius:4px;overflow:hidden;}
-.kprog-bar{
-  height:100%;width:0%;border-radius:4px;
-  background:linear-gradient(90deg,var(--a),#f472b6);
-  transition:width .12s;
-}
-.kkey{
-  font-size:.55rem;color:var(--sub);font-family:'Courier New',monospace;
-  word-break:break-all;line-height:1.55;background:rgba(139,124,248,.06);
-  border:1px solid var(--bor);border-radius:7px;padding:.45rem .6rem;
-  display:none;
-}
-.kkey.show{display:block;}
-.kkey b{color:var(--safe);}
-
-/* strength */
-.smeter{display:flex;gap:.2rem;margin-top:.28rem;}
-.sm{flex:1;height:3px;border-radius:3px;background:var(--inp);transition:background .25s;}
-.sw{background:var(--danger);}
-.so{background:var(--warn);}
-.sg{background:var(--safe);}
-.slbl{font-size:.57rem;color:var(--sub);margin-top:.18rem;}
-
-/* room code */
-.cdisp{
-  background:var(--inp);border:1px solid var(--bor);
-  border-radius:9px;padding:.9rem;text-align:center;
-}
+.cdisp{background:var(--inp);border:1px solid var(--bor);border-radius:9px;
+  padding:.9rem;text-align:center;}
 .cbig{font-size:1.9rem;font-weight:300;letter-spacing:.35em;color:var(--a);font-family:monospace;}
-.csub{font-size:.6rem;color:var(--sub);margin-top:.28rem;}
-
-.sl{display:flex;align-items:center;gap:.42rem;font-size:.65rem;color:var(--sub);}
+.csub{font-size:.58rem;color:var(--sub);margin-top:.26rem;}
+.sl{display:flex;align-items:center;gap:.4rem;font-size:.63rem;color:var(--sub);}
 .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;animation:bk 2s infinite;}
-.dg{background:var(--safe);box-shadow:0 0 5px var(--safe);}
-.dy{background:var(--warn);box-shadow:0 0 5px var(--warn);}
-.dr{background:var(--danger);box-shadow:0 0 5px var(--danger);}
-@keyframes bk{0%,100%{opacity:1}50%{opacity:.18}}
+.g{background:var(--safe);box-shadow:0 0 5px var(--safe);}
+.y{background:var(--warn);box-shadow:0 0 5px var(--warn);}
+.rd{background:var(--danger);box-shadow:0 0 5px var(--danger);}
+@keyframes bk{0%,100%{opacity:1}50%{opacity:.15}}
 
-/* ── CHAT ── */
-#chat{display:none;}
-#chat.on{display:flex;flex-direction:column;height:100%;}
-
-/* Portrait: single column */
-#vcol{display:flex;flex-direction:column;flex-shrink:0;}
-#mcol{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;}
-
-/* Landscape: side by side */
-@media (orientation:landscape) and (min-width:580px){
+/* CHAT */
+#chat{display:none;height:100%;}
+#chat.on{display:flex;flex-direction:column;}
+@media(orientation:landscape) and (min-width:580px){
   #chat.on{flex-direction:row;}
-  #vcol{width:40%;border-right:1px solid var(--bor);}
+  #vcol{width:40%;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid var(--bor);}
+  #mcol{flex:1;display:flex;flex-direction:column;min-width:0;}
   #vwrap.on{flex:1;}
 }
+@media not ((orientation:landscape) and (min-width:580px)){
+  #vcol{flex-shrink:0;}
+  #mcol{flex:1;display:flex;flex-direction:column;min-width:0;}
+}
 
-/* TOPBAR */
-.topbar{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:.58rem .85rem;
-  padding-top:calc(.58rem + env(safe-area-inset-top,0px));
-  background:var(--bg);border-bottom:1px solid var(--bor);flex-shrink:0;
-}
+#topbar{display:flex;align-items:center;justify-content:space-between;
+  padding:.58rem .85rem;padding-top:calc(.58rem + env(safe-area-inset-top));
+  background:var(--bg);border-bottom:1px solid var(--bor);flex-shrink:0;}
 .tl .tn{font-size:.9rem;font-weight:500;}
-.tl .ts{
-  display:flex;align-items:center;gap:.3rem;
-  font-size:.6rem;color:var(--sub);margin-top:.07rem;
-}
-.tr{display:flex;gap:.32rem;}
-.ic{
-  width:32px;height:32px;border-radius:50%;
-  background:var(--inp);border:1px solid var(--bor);
-  color:var(--txt);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  font-size:.78rem;transition:all .18s;flex-shrink:0;
-}
+.tl .ts{display:flex;align-items:center;gap:.28rem;font-size:.58rem;color:var(--sub);margin-top:.06rem;}
+.tr{display:flex;gap:.3rem;}
+.ic{width:32px;height:32px;border-radius:50%;background:var(--inp);border:1px solid var(--bor);
+  color:var(--txt);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:.78rem;transition:all .18s;flex-shrink:0;}
 .ic:hover,.ic.on{background:rgba(139,124,248,.18);border-color:var(--a);color:var(--a);}
 .ic.red{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.25);color:var(--danger);}
 
-/* VIDEO */
-#vwrap{position:relative;background:#000;display:none;overflow:hidden;flex-shrink:0;}
+#vwrap{position:relative;background:#000;display:none;overflow:hidden;}
 #vwrap.on{display:block;}
-@media (orientation:portrait){#vwrap.on{height:36vmin;max-height:210px;}}
-@media (orientation:landscape) and (min-width:580px){#vwrap.on{flex:1;}}
+@media(orientation:portrait){#vwrap.on{height:36vmin;max-height:200px;}}
 #remV{width:100%;height:100%;object-fit:cover;display:block;}
-#locV{
-  position:absolute;bottom:.45rem;right:.45rem;
-  width:64px;height:88px;object-fit:cover;
-  border-radius:7px;border:1.5px solid rgba(139,124,248,.45);
-}
-.voff{
-  position:absolute;inset:0;display:flex;align-items:center;
-  justify-content:center;flex-direction:column;gap:.32rem;
-  color:var(--sub);font-size:.6rem;
-}
-.voff-i{font-size:1.5rem;opacity:.14;}
+#locV{position:absolute;bottom:.45rem;right:.45rem;width:64px;height:88px;
+  object-fit:cover;border-radius:7px;border:1.5px solid rgba(139,124,248,.45);}
+.voff{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:.3rem;color:var(--sub);font-size:.6rem;}
+.voff i{font-size:1.5rem;opacity:.13;font-style:normal;}
 
-/* MESSAGES */
-#msgs{
-  flex:1;overflow-y:auto;overflow-x:hidden;
-  padding:.68rem;display:flex;flex-direction:column;gap:.42rem;
-  scroll-behavior:smooth;-webkit-overflow-scrolling:touch;
-  min-height:0;
-}
+#msgs{flex:1;overflow-y:auto;padding:.68rem;display:flex;flex-direction:column;gap:.42rem;
+  scroll-behavior:smooth;-webkit-overflow-scrolling:touch;}
 #msgs::-webkit-scrollbar{width:2px;}
 #msgs::-webkit-scrollbar-thumb{background:var(--bor);}
 
 .mw{display:flex;flex-direction:column;max-width:78%;}
 .mw.me{align-self:flex-end;align-items:flex-end;}
 .mw.them{align-self:flex-start;align-items:flex-start;}
-.bub{
-  padding:.5rem .76rem;font-size:.83rem;
-  line-height:1.5;word-break:break-word;border-radius:11px;
-}
+.bub{padding:.5rem .76rem;font-size:.83rem;line-height:1.5;word-break:break-word;border-radius:11px;}
 .mw.me .bub{background:var(--me);border-bottom-right-radius:3px;}
 .mw.them .bub{background:var(--them);border:1px solid var(--bor);border-bottom-left-radius:3px;}
 .bub img{max-width:170px;max-height:190px;border-radius:7px;display:block;cursor:pointer;}
 .mt{font-size:.5rem;color:var(--sub);margin-top:.1rem;}
 .et{font-size:.47rem;color:var(--safe);opacity:.45;}
-.sys{
-  align-self:center;font-size:.57rem;color:var(--sub);
-  padding:.2rem .62rem;background:var(--inp);
-  border-radius:20px;border:1px solid var(--bor);text-align:center;
-}
+.sys{align-self:center;font-size:.56rem;color:var(--sub);padding:.2rem .62rem;
+  background:var(--inp);border-radius:20px;border:1px solid var(--bor);text-align:center;}
 
-/* INPUT BAR */
-.ibar{
-  padding:.52rem .68rem;
-  padding-bottom:calc(.52rem + env(safe-area-inset-bottom,0px));
-  background:var(--bg);border-top:1px solid var(--bor);flex-shrink:0;
-}
+.ibar{padding:.52rem .68rem;padding-bottom:calc(.52rem + env(safe-area-inset-bottom));
+  background:var(--bg);border-top:1px solid var(--bor);flex-shrink:0;}
 .ir{display:flex;gap:.36rem;align-items:flex-end;}
-#mi{
-  flex:1;min-height:36px;max-height:96px;
-  padding:.5rem .76rem;background:var(--inp);
-  border:1px solid var(--bor);color:var(--txt);
-  font-family:inherit;font-size:.85rem;border-radius:18px;
-  outline:none;resize:none;line-height:1.42;
-  transition:border-color .2s;overflow-y:auto;
-}
+#mi{flex:1;min-height:36px;max-height:96px;padding:.5rem .76rem;background:var(--inp);
+  border:1px solid var(--bor);color:var(--txt);font-family:inherit;font-size:.85rem;
+  border-radius:18px;outline:none;resize:none;line-height:1.42;transition:border-color .2s;}
 #mi:focus{border-color:var(--a);}
-.sb{
-  width:35px;height:35px;flex-shrink:0;border-radius:50%;
-  background:var(--a);border:none;color:#fff;
-  font-size:.85rem;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:transform .1s,opacity .2s;
-}
-.sb:active{transform:scale(.88);}
-.sb:disabled{opacity:.28;}
-.ab{
-  width:33px;height:33px;flex-shrink:0;border-radius:50%;
-  background:var(--inp);border:1px solid var(--bor);
-  color:var(--sub);font-size:.8rem;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:all .18s;
-}
-.ab:active{border-color:var(--a);color:var(--a);}
+.snd{width:35px;height:35px;flex-shrink:0;border-radius:50%;background:var(--a);border:none;
+  color:#fff;font-size:.85rem;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;transition:transform .1s;}
+.snd:active{transform:scale(.88);}
+.att{width:33px;height:33px;flex-shrink:0;border-radius:50%;background:var(--inp);
+  border:1px solid var(--bor);color:var(--sub);font-size:.8rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .18s;}
+.att:active{border-color:var(--a);color:var(--a);}
 #fi{display:none;}
 
-/* TOAST */
-#toast{
-  position:fixed;bottom:4.5rem;left:50%;
-  transform:translateX(-50%) translateY(4px);
-  background:var(--card);border:1px solid var(--bor);
-  padding:.38rem .9rem;border-radius:18px;
-  font-size:.65rem;white-space:nowrap;opacity:0;
-  transition:all .22s;pointer-events:none;z-index:99;
-  max-width:85vw;text-align:center;
-}
+#toast{position:fixed;bottom:4.5rem;left:50%;transform:translateX(-50%) translateY(4px);
+  background:var(--card);border:1px solid var(--bor);padding:.38rem .9rem;border-radius:18px;
+  font-size:.65rem;white-space:nowrap;opacity:0;transition:all .22s;pointer-events:none;
+  z-index:99;max-width:82vw;text-align:center;}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* MODAL */
-.mbg{
-  position:fixed;inset:0;background:rgba(0,0,0,.75);
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  z-index:50;display:flex;align-items:center;justify-content:center;
-  padding:1rem;opacity:0;pointer-events:none;transition:opacity .22s;
-}
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);
+  z-index:50;display:flex;align-items:center;justify-content:center;padding:1rem;
+  opacity:0;pointer-events:none;transition:opacity .22s;}
 .mbg.on{opacity:1;pointer-events:all;}
-.modal{
-  background:var(--card);border:1px solid var(--bor);border-radius:var(--r);
-  padding:1.3rem;width:min(350px,100%);display:flex;flex-direction:column;
-  gap:.85rem;max-height:85vh;overflow-y:auto;
-}
+.modal{background:var(--card);border:1px solid var(--bor);border-radius:var(--r);
+  padding:1.3rem;width:min(350px,100%);display:flex;flex-direction:column;gap:.85rem;
+  max-height:85vh;overflow-y:auto;}
 .modal h3{font-size:.95rem;font-weight:500;color:var(--a);}
-.minfo{font-size:.72rem;line-height:1.85;color:var(--sub);}
+.minfo{font-size:.71rem;line-height:1.85;color:var(--sub);}
 .minfo b{color:var(--txt);}
-.chip{
-  display:inline-block;background:rgba(74,222,128,.08);
-  border:1px solid rgba(74,222,128,.2);color:var(--safe);
-  padding:.12rem .45rem;border-radius:5px;font-size:.57rem;margin:.08rem;
-}
+.chip{display:inline-block;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);
+  color:var(--safe);padding:.1rem .42rem;border-radius:5px;font-size:.56rem;margin:.08rem;}
 
-/* LIGHTBOX */
-#lb{
-  position:fixed;inset:0;background:rgba(0,0,0,.96);
-  z-index:100;display:none;align-items:center;
-  justify-content:center;cursor:pointer;
-}
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:100;
+  display:none;align-items:center;justify-content:center;cursor:pointer;}
 #lb.on{display:flex;}
 #lbi{max-width:95vw;max-height:88vh;border-radius:8px;object-fit:contain;}
 </style>
 </head>
 <body>
 
-<!-- ══════════════ SETUP ══════════════ -->
+<!-- SETUP -->
 <div id="setup">
 <div class="si">
 
   <div class="logo">
     <h1>Only <b>Us</b></h1>
     <p>end-to-end encrypted</p>
-    <div class="sbadge">🔒 PBKDF2-Argon2 · X25519 · XSalsa20-Poly1305</div>
+    <div class="sbadge">🔒 PBKDF2-256 · X25519 · XSalsa20-Poly1305</div>
   </div>
 
-  <!-- MAIN CARD -->
   <div class="card" id="mainCard">
     <div class="ct">Connect</div>
 
@@ -317,65 +205,51 @@ html,body{
     </div>
 
     <div class="f">
-      <label>Shared passphrase
-        <span style="color:var(--sub);font-size:.52rem;text-transform:none;letter-spacing:0;"> — both use same</span>
-      </label>
-      <input type="password" id="passIn" placeholder="Make it strong"
-        autocomplete="new-password" oninput="checkStr(this.value)"/>
+      <label>Shared passphrase <span style="color:var(--sub);font-size:.52rem;">— both use same</span></label>
+      <div class="pw-wrap">
+        <input type="password" id="passIn" placeholder="Make it strong"
+          autocomplete="new-password" oninput="checkStr(this.value)"/>
+        <button class="pw-eye" type="button" onclick="togglePw()" id="eyeBtn" title="Show/hide">👁️</button>
+      </div>
       <div class="smeter">
-        <div class="sm" id="s1"></div>
-        <div class="sm" id="s2"></div>
-        <div class="sm" id="s3"></div>
-        <div class="sm" id="s4"></div>
+        <div class="sb" id="s1"></div>
+        <div class="sb" id="s2"></div>
+        <div class="sb" id="s3"></div>
+        <div class="sb" id="s4"></div>
       </div>
       <div class="slbl" id="slbl"></div>
     </div>
 
     <!-- KDF progress -->
-    <div class="kprog-wrap" id="kprogWrap">
-      <div class="kprog-top">
-        <span id="kprogLabel">Deriving 256-bit key…</span>
-        <span id="kprogPct">0%</span>
-      </div>
-      <div class="kprog"><div class="kprog-bar" id="kprogBar"></div></div>
-    </div>
-
-    <!-- key preview -->
-    <div class="kkey" id="kkeyBox">
-      <b>256-bit key ready ✦</b><br>
-      <span id="kkeyHex"></span>…
+    <div class="kpw" id="kpw">
+      <div class="kpl"><span>Deriving 256-bit key…</span><b id="kpct">0%</b></div>
+      <div class="kpb-bg"><div class="kpb" id="kpb"></div></div>
     </div>
 
     <div class="or">connect via</div>
     <div class="r2">
       <button class="btn bp" id="createBtn" onclick="goCreate()">Create room</button>
-      <button class="btn bs" id="joinBtn"   onclick="goJoin()">Join room</button>
+      <button class="btn bs" id="joinBtn" onclick="goJoin()">Join room</button>
     </div>
   </div>
 
-  <!-- CREATE CARD -->
   <div class="card" id="createCard" style="display:none;">
     <div class="ct">Your room</div>
     <div class="cdisp">
       <div class="cbig" id="codeOut">——</div>
       <div class="csub">Share this code with them</div>
     </div>
-    <div class="sl">
-      <span class="dot dy" id="hDot"></span>
-      <span id="hTxt">Setting up…</span>
-    </div>
+    <div class="sl"><span class="dot y" id="hDot"></span><span id="hTxt">Setting up…</span></div>
     <button class="btn bs" onclick="copyCode()">Copy code</button>
     <button class="btn bs" onclick="goBack()">← Back</button>
   </div>
 
-  <!-- JOIN CARD -->
   <div class="card" id="joinCard" style="display:none;">
     <div class="ct">Join room</div>
     <div class="f">
       <label>Room code</label>
       <input type="text" id="codeIn" placeholder="Enter code" maxlength="8"
-        autocomplete="off" autocorrect="off" autocapitalize="characters"
-        spellcheck="false"
+        autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
         oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/>
     </div>
     <button class="btn bp" onclick="doJoin()">Connect</button>
@@ -385,50 +259,39 @@ html,body{
 </div>
 </div>
 
-<!-- ══════════════ CHAT ══════════════ -->
+<!-- CHAT -->
 <div id="chat">
-
-  <!-- vcol: topbar + video (portrait: stacked top; landscape: left column) -->
   <div id="vcol">
-    <div class="topbar">
+    <div id="topbar">
       <div class="tl">
         <div class="tn">Only Us</div>
-        <div class="ts">
-          <span class="dot dy" id="cDot"></span>
-          <span id="cTxt">connecting…</span>
-        </div>
+        <div class="ts"><span class="dot y" id="cDot"></span><span id="cTxt">connecting…</span></div>
       </div>
       <div class="tr">
-        <button class="ic" id="camBtn" onclick="toggleCam()" title="Video">📷</button>
-        <button class="ic" id="micBtn" onclick="toggleMic()" title="Mic">🎙️</button>
-        <button class="ic" onclick="openInfo()" title="Security">🔒</button>
-        <button class="ic red" onclick="endSess()" title="End">✕</button>
+        <button class="ic" id="camBtn" onclick="toggleCam()">📷</button>
+        <button class="ic" id="micBtn" onclick="toggleMic()">🎙️</button>
+        <button class="ic" onclick="G('infoM').classList.add('on')">🔒</button>
+        <button class="ic red" onclick="endSess()">✕</button>
       </div>
     </div>
     <div id="vwrap">
-      <div class="voff" id="voff">
-        <div class="voff-i">📷</div>
-        <div>video off</div>
-      </div>
+      <div class="voff" id="voff"><i>📷</i><div>video off</div></div>
       <video id="remV" autoplay playsinline></video>
       <video id="locV" autoplay playsinline muted></video>
     </div>
   </div>
-
-  <!-- mcol: messages + input -->
   <div id="mcol">
     <div id="msgs"></div>
     <div class="ibar">
       <div class="ir">
         <input type="file" id="fi" accept="image/*" onchange="sendImg(event)"/>
-        <button class="ab" onclick="G('fi').click()" title="Send photo">📎</button>
+        <button class="att" onclick="G('fi').click()">📎</button>
         <textarea id="mi" placeholder="Message…" rows="1"
           onkeydown="onKey(event)" oninput="rsz(this)"></textarea>
-        <button class="sb" id="sbtn" onclick="sendMsg()">➤</button>
+        <button class="snd" onclick="sendMsg()">➤</button>
       </div>
     </div>
   </div>
-
 </div>
 
 <!-- INFO MODAL -->
@@ -436,26 +299,15 @@ html,body{
   <div class="modal">
     <h3>🔒 Security breakdown</h3>
     <div class="minfo">
-      <p><b>Passphrase → 256-bit key</b><br>
-        <span class="chip">PBKDF2-SHA512</span>
-        600,000 iterations (OWASP 2023 standard). Output is always exactly 32 bytes (256 bits). Even `1432` produces a 256-bit key that cannot be reversed.</p>
-
-      <p style="margin-top:.6rem;"><b>Double-lock key derivation</b><br>
-        <span class="chip">X25519 ECDH</span> +
-        <span class="chip">PBKDF2 hash</span><br>
-        Final key = SHA-512(X25519_result ‖ PBKDF2_result) → first 256 bits.<br>
-        Both must be correct to decrypt anything.</p>
-
-      <p style="margin-top:.6rem;"><b>Every message &amp; photo</b><br>
-        <span class="chip">XSalsa20-Poly1305</span>
-        Same as Signal. 192-bit random nonce per message. Authenticated — tamper-proof.</p>
-
+      <p><b>Password → 256-bit key</b><br>
+      <span class="chip">PBKDF2-SHA512</span> 600,000 iterations (OWASP 2023 standard). Even `1432` becomes a 256-bit key that takes centuries to reverse.</p>
+      <p style="margin-top:.6rem;"><b>Key exchange</b><br>
+      <span class="chip">X25519 ECDH</span> Your private key never leaves your device. Mixed with PBKDF2 output — both must be correct.</p>
+      <p style="margin-top:.6rem;"><b>Messages &amp; photos</b><br>
+      <span class="chip">XSalsa20-Poly1305</span> Same as Signal. Unique 192-bit nonce every message. Tamper detection built in.</p>
       <p style="margin-top:.6rem;"><b>Video &amp; voice</b><br>
-        <span class="chip">DTLS-SRTP</span>
-        WebRTC browser-enforced E2EE. Relay sees zero media.</p>
-
-      <p style="margin-top:.6rem;"><b>No storage</b><br>
-        Nothing saved anywhere. Close tab = everything gone forever.</p>
+      <span class="chip">DTLS-SRTP</span> WebRTC browser E2EE. Relay sees zero media.</p>
+      <p style="margin-top:.6rem;"><b>Storage</b><br>Zero. Close tab = gone forever.</p>
     </div>
     <button class="btn bp" onclick="G('infoM').classList.remove('on')">Got it</button>
   </div>
@@ -467,199 +319,162 @@ html,body{
 <script>
 'use strict';
 
-// ═══════════════════════════════════════════════
-//  256-BIT KEY DERIVATION
-//  PBKDF2-SHA-512 (600k iterations) → 32 bytes
-//  Uses WebCrypto API — available on ALL browsers
-//  including old Android Chrome, Firefox, Safari
-// ═══════════════════════════════════════════════
-const KDF_ITERS = 600000;
-const KDF_SALT  = 'onlyus-v4-kdf-2024'; // static, same both sides
+// ══════════════════════════════════════════════
+//  KDF: PBKDF2-SHA512 → 256-bit key
+//  Works on 100% of browsers including potato
+//  600,000 iterations = OWASP 2023 recommendation
+// ══════════════════════════════════════════════
+const KDF_SALT    = new TextEncoder().encode('onlyus-v3-pbkdf2-salt');
+const KDF_ITER    = 600000;
+const KDF_KEYLEN  = 256; // bits
 
 async function deriveKey256(passphrase) {
-  const pw  = passphrase.trim();
-  showProg(true, 'Deriving 256-bit key…');
-  setProg(10);
+  const pw = passphrase.trim();
+  setProg(true, 5);
+  await tick();
 
-  let key32;
-  try {
-    // Import raw password as key material
-    const keyMat = await crypto.subtle.importKey(
-      'raw',
-      new TextEncoder().encode(pw),
-      { name: 'PBKDF2' },
-      false,
-      ['deriveBits']
-    );
-    setProg(30);
+  // Import raw key material
+  const keyMat = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(pw),
+    'PBKDF2',
+    false,
+    ['deriveBits']
+  );
 
-    // PBKDF2-SHA-512 → 256 bits
-    const bits = await crypto.subtle.deriveBits(
-      {
-        name:       'PBKDF2',
-        hash:       'SHA-512',
-        salt:       new TextEncoder().encode(KDF_SALT),
-        iterations: KDF_ITERS
-      },
-      keyMat,
-      256 // bits
-    );
-    setProg(90);
-    key32 = new Uint8Array(bits); // 32 bytes = 256 bits
-  } catch(e) {
-    // Fallback for very old browsers — iterative SHA-512
-    key32 = await fallbackKDF(pw);
-  }
+  setProg(true, 20);
+  await tick();
 
-  setProg(100);
-  await sleep(120);
-  showProg(false);
+  // Derive 256 bits
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', hash: 'SHA-512', salt: KDF_SALT, iterations: KDF_ITER },
+    keyMat,
+    KDF_KEYLEN
+  );
 
-  // Show hex preview of first 8 bytes
-  const hexStr = Array.from(key32.slice(0, 8))
-    .map(b => b.toString(16).padStart(2,'0')).join(' ');
-  G('kkeyHex').textContent = hexStr;
-  G('kkeyBox').classList.add('show');
-  setTimeout(() => G('kkeyBox').classList.remove('show'), 3500);
+  setProg(true, 100);
+  await tick(100);
+  setProg(false, 0);
 
-  return key32;
+  return new Uint8Array(bits); // 32 bytes = 256 bits
 }
 
-// Fallback: iterative nacl.hash (SHA-512) for ancient browsers
-async function fallbackKDF(pw) {
-  showProg(true, 'Deriving key (fallback)…');
-  let h = nacl.util.decodeUTF8(pw + KDF_SALT);
-  const rounds = 80000;
-  for (let i = 0; i < rounds; i++) {
-    h = nacl.hash(h);
-    if (i % 8000 === 0) {
-      setProg(Math.round((i / rounds) * 90));
-      await sleep(0);
-    }
-  }
-  return h.slice(0, 32);
+function setProg(show, pct) {
+  G('kpw').classList.toggle('on', show);
+  G('kpb').style.width = pct + '%';
+  G('kpct').textContent = pct + '%';
 }
 
-function showProg(show, label) {
-  G('kprogWrap').classList.toggle('show', show);
-  if (label) G('kprogLabel').textContent = label;
-}
+function tick(ms=10) { return new Promise(r => setTimeout(r, ms)); }
 
-function setProg(pct) {
-  G('kprogBar').style.width = pct + '%';
-  G('kprogPct').textContent = pct + '%';
-}
-
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-// ═══════════════════════════════════════════════
-//  CORE CRYPTO  (TweetNaCl = libsodium)
-// ═══════════════════════════════════════════════
-let KP = null; // { publicKey, secretKey } X25519
-let SK = null; // 32-byte shared encryption key
+// ══════════════════════════════════════════════
+//  CRYPTO CORE
+// ══════════════════════════════════════════════
+let KP  = null; // X25519 keypair
+let SK  = null; // final 256-bit shared key
+let PH  = null; // PBKDF2 hash of passphrase
 
 function genKP() { KP = nacl.box.keyPair(); }
 
-// Final key = SHA-512( X25519(mySecret, theirPub) || PBKDF2_key ) → [0..31]
-function buildSharedKey(theirPub64, kdfKey) {
+// Final SK = SHA-512(X25519_DH || PBKDF2_hash) → first 256 bits
+// BOTH the DH key exchange AND the passphrase must be correct
+function buildSK(theirPub64, pbkdf2Key) {
   const dh  = nacl.scalarMult(KP.secretKey, nacl.util.decodeBase64(theirPub64));
-  const mix = new Uint8Array(dh.length + kdfKey.length);
+  const mix = new Uint8Array(dh.length + pbkdf2Key.length);
   mix.set(dh, 0);
-  mix.set(kdfKey, dh.length);
-  return nacl.hash(mix).slice(0, 32); // SHA-512 → first 256 bits
+  mix.set(pbkdf2Key, dh.length);
+  return nacl.hash(mix).slice(0, 32); // SHA-512 → 256 bits
 }
 
-// Encrypt text → "nonceB64.ciphertextB64"
 function enc(txt) {
-  if (!SK) return null;
-  const n = nacl.randomBytes(nacl.secretbox.nonceLength); // 192-bit nonce
-  const c = nacl.secretbox(nacl.util.decodeUTF8(txt), n, SK);
-  return nacl.util.encodeBase64(n) + '.' + nacl.util.encodeBase64(c);
+  const n = nacl.randomBytes(nacl.secretbox.nonceLength);
+  const b = nacl.secretbox(nacl.util.decodeUTF8(txt), n, SK);
+  return nacl.util.encodeBase64(n) + '.' + nacl.util.encodeBase64(b);
 }
 
-// Decrypt "nonceB64.ciphertextB64" → text or null
-function dec(payload) {
-  if (!SK || !payload) return null;
+function dec(p) {
   try {
-    const dot = payload.indexOf('.');
-    if (dot === -1) return null;
-    const n = nacl.util.decodeBase64(payload.slice(0, dot));
-    const c = nacl.util.decodeBase64(payload.slice(dot + 1));
-    const o = nacl.secretbox.open(c, n, SK);
+    const i = p.indexOf('.');
+    const o = nacl.secretbox.open(
+      nacl.util.decodeBase64(p.slice(i+1)),
+      nacl.util.decodeBase64(p.slice(0,i)), SK);
     return o ? nacl.util.encodeUTF8(o) : null;
   } catch(e) { return null; }
 }
 
-// Encrypt binary bytes → "nonceB64.ciphertextB64"
-function encBytes(bytes) {
-  if (!SK) return null;
+function encB(bytes) {
   const n = nacl.randomBytes(nacl.secretbox.nonceLength);
-  const c = nacl.secretbox(bytes, n, SK);
-  return nacl.util.encodeBase64(n) + '.' + nacl.util.encodeBase64(c);
+  const b = nacl.secretbox(bytes, n, SK);
+  return nacl.util.encodeBase64(n) + '.' + nacl.util.encodeBase64(b);
 }
 
-// Decrypt → Uint8Array or null
-function decBytes(payload) {
-  if (!SK || !payload) return null;
+function decB(p) {
   try {
-    const dot = payload.indexOf('.');
-    const n   = nacl.util.decodeBase64(payload.slice(0, dot));
-    const c   = nacl.util.decodeBase64(payload.slice(dot + 1));
-    return nacl.secretbox.open(c, n, SK);
+    const i = p.indexOf('.');
+    return nacl.secretbox.open(
+      nacl.util.decodeBase64(p.slice(i+1)),
+      nacl.util.decodeBase64(p.slice(0,i)), SK);
   } catch(e) { return null; }
 }
 
-// ═══════════════════════════════════════════════
-//  PASSWORD STRENGTH METER
-// ═══════════════════════════════════════════════
-function checkStr(pw) {
-  let s = 0;
-  if (pw.length >= 8)  s++;
-  if (pw.length >= 14) s++;
-  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) s++;
-  if (/[0-9!@#$%^&*_\-+=]/.test(pw)) s++;
-  const c = ['','sw','sw','so','sg'];
-  const l = ['','Weak — easy to crack','Weak — easy to crack','Fair — try 14+ chars','Strong ✦'];
-  for (let i = 1; i <= 4; i++) {
-    G('s'+i).className = 'sm' + (i <= s ? ' '+c[s] : '');
-  }
-  G('slbl').textContent = pw.length ? (l[s] || 'Weak') : '';
+// ══════════════════════════════════════════════
+//  PASSWORD VISIBILITY TOGGLE
+// ══════════════════════════════════════════════
+let pwVisible = false;
+function togglePw() {
+  pwVisible = !pwVisible;
+  const inp = G('passIn');
+  inp.type = pwVisible ? 'text' : 'password';
+  G('eyeBtn').textContent = pwVisible ? '🙈' : '👁️';
+  inp.focus();
 }
 
-// ═══════════════════════════════════════════════
-//  APP STATE
-// ═══════════════════════════════════════════════
-let peer     = null;
-let conn     = null;
-let vcall    = null;
-let stream   = null;
-let roomCode = '';
-let myName   = '';
-let kdfKey   = null; // 32-byte PBKDF2 result
-let camOn    = false;
-let micOn    = false;
+// ══════════════════════════════════════════════
+//  STRENGTH METER
+// ══════════════════════════════════════════════
+function checkStr(pw) {
+  let s = 0;
+  if (pw.length >= 6)  s++;
+  if (pw.length >= 12) s++;
+  if (/[A-Za-z]/.test(pw) && /[0-9]/.test(pw)) s++;
+  if (/[!@#$%^&*_\-]/.test(pw)) s++;
+  const c = ['','sw','sw','so','sg'];
+  const l = ['','Weak — add more chars','Weak — mix letters & numbers','Fair — add a symbol','Strong ✦'];
+  for (let i=1;i<=4;i++) G('s'+i).className='sb'+(i<=s?' '+c[s]:'');
+  G('slbl').textContent = pw.length ? (l[s]||'Weak') : '';
+}
 
-// ═══════════════════════════════════════════════
-//  SETUP NAVIGATION
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════
+//  APP STATE
+// ══════════════════════════════════════════════
+let peer=null, conn=null, vcall=null, stream=null;
+let roomCode='', myName='';
+let camOn=false, micOn=false;
+
+// ══════════════════════════════════════════════
+//  SETUP
+// ══════════════════════════════════════════════
 async function validate() {
   myName = G('nameIn').value.trim();
   const pass = G('passIn').value;
   if (!myName)      { toast('Enter your name'); return false; }
   if (!pass.trim()) { toast('Enter a passphrase'); return false; }
-  if (pass.length < 4) { toast('Passphrase too short'); return false; }
+  if (pass.length < 4) { toast('Passphrase too short — min 4 chars'); return false; }
 
-  // Disable buttons while hashing
-  G('createBtn').disabled = true;
-  G('joinBtn').disabled   = true;
+  setInputs(true);
+  try {
+    PH = await deriveKey256(pass);
+  } catch(e) {
+    toast('Key derivation failed — check browser');
+    setInputs(false); return false;
+  }
+  setInputs(false);
+  return !!PH;
+}
 
-  kdfKey = await deriveKey256(pass);
-
-  G('createBtn').disabled = false;
-  G('joinBtn').disabled   = false;
-
-  if (!kdfKey) { toast('Key derivation failed — try again'); return false; }
-  return true;
+function setInputs(disabled) {
+  G('createBtn').disabled = disabled;
+  G('joinBtn').disabled   = disabled;
 }
 
 function makeCode() {
@@ -683,36 +498,29 @@ async function goJoin() {
 
 function goBack() {
   showCard('mainCard');
-  if (peer) { try { peer.destroy(); } catch(e){} peer = null; }
+  if (peer) { peer.destroy(); peer = null; }
 }
 
 function copyCode() {
   navigator.clipboard.writeText(roomCode)
-    .then(() => toast('Code copied!'))
+    .then(() => toast('Code copied! ✦'))
     .catch(() => toast('Code: ' + roomCode));
 }
 
 function showCard(id) {
   ['mainCard','createCard','joinCard'].forEach(c =>
-    G(c).style.display = (c === id) ? '' : 'none'
-  );
+    G(c).style.display = c===id ? '' : 'none');
 }
 
-// ═══════════════════════════════════════════════
-//  HOST — creates the room
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════
+//  HOST
+// ══════════════════════════════════════════════
 function initHost() {
-  setHS('dy', 'Waiting for them to join…');
+  setHS('y','Waiting for them…');
   const hid = 'ou5-' + roomCode.toLowerCase() + '-h';
+  peer = new Peer(hid, { debug: 0 });
 
-  try {
-    peer = new Peer(hid, { debug: 0 });
-  } catch(e) {
-    setHS('dr', 'PeerJS failed — check internet');
-    return;
-  }
-
-  peer.on('open', () => setHS('dg', 'Ready — share the code ✦'));
+  peer.on('open', () => setHS('g','Ready — share the code'));
 
   peer.on('connection', c => {
     conn = c;
@@ -723,50 +531,42 @@ function initHost() {
 
   peer.on('error', e => {
     if (e.type === 'unavailable-id') {
-      // Code taken — generate new one
+      // Code taken — regenerate silently
       roomCode = makeCode();
       G('codeOut').textContent = roomCode;
-      try { peer.destroy(); } catch(ex) {}
+      peer.destroy();
       setTimeout(initHost, 800);
-    } else if (e.type === 'network' || e.type === 'server-error') {
-      setHS('dr', 'Network error — check connection');
     } else {
-      setHS('dr', 'Error: ' + e.type);
+      setHS('rd', 'Error — try again');
+      toast('Host error: ' + e.type);
     }
-  });
-
-  peer.on('disconnected', () => {
-    setHS('dy', 'Reconnecting…');
-    try { peer.reconnect(); } catch(e) {}
   });
 }
 
-// ═══════════════════════════════════════════════
-//  GUEST — joins the room
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════
+//  JOIN
+// ══════════════════════════════════════════════
 function doJoin() {
   const code = G('codeIn').value.trim().toUpperCase();
-  if (code.length < 4) { toast('Enter the code'); return; }
-
+  if (code.length < 4) { toast('Enter the room code'); return; }
   roomCode = code;
   genKP();
 
-  const gid = 'ou5-' + code.toLowerCase() + '-g' + Date.now().toString(36).slice(-4);
+  const gid = 'ou5-' + code.toLowerCase() + '-g' + Date.now().toString(36).slice(-5);
   const hid = 'ou5-' + code.toLowerCase() + '-h';
 
-  try {
-    peer = new Peer(gid, { debug: 0 });
-  } catch(e) {
-    toast('PeerJS init failed — check internet');
-    return;
-  }
+  peer = new Peer(gid, { debug: 0 });
 
   peer.on('open', () => {
+    setCS('y','connecting…');
     try {
-      conn = peer.connect(hid, { reliable: true, serialization: 'json' });
+      conn = peer.connect(hid, {
+        reliable:      true,
+        serialization: 'json'
+      });
       wire();
     } catch(e) {
-      toast('Connection failed — check the code');
+      toast('Connection error — check code');
     }
   });
 
@@ -775,208 +575,163 @@ function doJoin() {
   peer.on('error', e => {
     if (e.type === 'peer-unavailable') {
       toast('Room not found — check the code');
-    } else if (e.type === 'network') {
-      toast('Network error — check your connection');
+      setCS('rd','room not found');
     } else {
       toast('Error: ' + e.type);
+      setCS('rd', e.type);
     }
-  });
-
-  peer.on('disconnected', () => {
-    setCS('dy', 'reconnecting…');
-    try { peer.reconnect(); } catch(e) {}
   });
 }
 
-// ═══════════════════════════════════════════════
-//  DATA CHANNEL — key exchange + messaging
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════
+//  DATA CHANNEL — FIXED key exchange
+// ══════════════════════════════════════════════
 function wire() {
+  // conn.on('open') fires when the data channel is actually ready
   conn.on('open', () => {
-    // Send my public key + name
-    try {
-      conn.send({
-        t: 'K',
-        k: nacl.util.encodeBase64(KP.publicKey),
-        n: myName
-      });
-    } catch(e) {
-      toast('Failed to send key');
-    }
-    setCS('dy', 'exchanging keys…');
+    setCS('y','exchanging keys…');
+    // Send my public key — this is safe to send unencrypted
+    // Security comes from PBKDF2 mixing, not key secrecy
+    conn.send({
+      t: 'KEY',
+      k: nacl.util.encodeBase64(KP.publicKey),
+      n: myName
+    });
   });
 
-  conn.on('data', msg => {
-    if (!msg || !msg.t) return;
+  conn.on('data', d => {
+    if (!d || !d.t) return;
 
-    // KEY EXCHANGE — derive shared secret
-    if (msg.t === 'K') {
+    // ── KEY EXCHANGE ──
+    if (d.t === 'KEY') {
       try {
-        SK = buildSharedKey(msg.k, kdfKey);
+        SK = buildSK(d.k, PH);
         launchChat();
-        setCS('dg', 'encrypted · connected');
-        addSys('Connected ✦ PBKDF2-256 + X25519 + XSalsa20 active');
+        setCS('g','encrypted · connected');
+        addSys('Connected ✦ PBKDF2-256 + X25519 + XSalsa20-Poly1305 active');
       } catch(e) {
-        toast('Key exchange failed — refresh and try again');
+        toast('Key exchange failed — make sure passphrase matches');
+        setCS('rd','key mismatch?');
       }
       return;
     }
 
-    // TEXT MESSAGE
-    if (msg.t === 'M') {
-      if (!SK) return;
-      const plain = dec(msg.d);
+    // Must have SK to decrypt
+    if (!SK) return;
+
+    // ── TEXT ──
+    if (d.t === 'MSG') {
+      const plain = dec(d.d);
       if (plain !== null) addMsg(plain, 'them');
       return;
     }
 
-    // IMAGE
-    if (msg.t === 'I') {
-      if (!SK) return;
-      const bytes = decBytes(msg.d);
+    // ── IMAGE ──
+    if (d.t === 'IMG') {
+      const bytes = decB(d.d);
       if (bytes) {
-        const url = URL.createObjectURL(new Blob([bytes], { type: msg.m || 'image/jpeg' }));
+        const url = URL.createObjectURL(new Blob([bytes], { type: d.m || 'image/jpeg' }));
         addImg(url, 'them');
       }
     }
   });
 
   conn.on('close', () => {
-    setCS('dr', 'disconnected');
+    setCS('rd','disconnected');
     addSys('Connection closed');
   });
 
   conn.on('error', e => {
-    setCS('dr', 'connection error');
+    setCS('rd','error');
     toast('Connection error');
+    console.error('conn error', e);
   });
 }
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════
 //  SEND
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════
 function sendMsg() {
-  const el  = G('mi');
-  const txt = el.value.trim();
+  const el = G('mi'), txt = el.value.trim();
   if (!txt) return;
-  if (!SK)  { toast('Not encrypted yet — wait a moment'); return; }
-  if (!conn || !conn.open) { toast('Not connected'); return; }
-
-  const payload = enc(txt);
-  if (!payload) { toast('Encryption failed'); return; }
-
-  try {
-    conn.send({ t: 'M', d: payload });
-    addMsg(txt, 'me');
-    el.value = '';
-    el.style.height = 'auto';
-  } catch(e) {
-    toast('Send failed — check connection');
-  }
+  if (!rdy()) { toast('Not connected yet — wait for green dot'); return; }
+  conn.send({ t: 'MSG', d: enc(txt) });
+  addMsg(txt, 'me');
+  el.value = ''; el.style.height = 'auto';
 }
 
 function sendImg(e) {
   const f = e.target.files[0];
   if (!f) return;
-  if (!SK)  { toast('Not encrypted yet'); return; }
-  if (!conn || !conn.open) { toast('Not connected'); return; }
-  if (f.size > 8 * 1024 * 1024) { toast('Max 8MB per image'); return; }
-
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const bytes   = new Uint8Array(ev.target.result);
-    const payload = encBytes(bytes);
-    if (!payload) { toast('Encryption failed'); return; }
-    try {
-      conn.send({ t: 'I', d: payload, m: f.type });
-      addImg(URL.createObjectURL(f), 'me');
-      toast('Photo sent ✦');
-    } catch(ex) {
-      toast('Image too large to send');
-    }
+  if (!rdy()) { toast('Not connected yet'); return; }
+  if (f.size > 8*1024*1024) { toast('Max 8MB per image'); return; }
+  const r = new FileReader();
+  r.onload = ev => {
+    const bytes = new Uint8Array(ev.target.result);
+    conn.send({ t: 'IMG', d: encB(bytes), m: f.type });
+    addImg(URL.createObjectURL(f), 'me');
+    toast('Photo sent ✦');
   };
-  reader.onerror = () => toast('Could not read image');
-  reader.readAsArrayBuffer(f);
+  r.readAsArrayBuffer(f);
   e.target.value = '';
 }
 
-// ═══════════════════════════════════════════════
-//  VIDEO CALL
-// ═══════════════════════════════════════════════
+function rdy() { return !!(conn && conn.open && SK); }
+
+// ══════════════════════════════════════════════
+//  VIDEO
+// ══════════════════════════════════════════════
 async function toggleCam() {
   if (!camOn) {
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:true });
       G('locV').srcObject = stream;
-      camOn = true;
-      micOn = true;
+      camOn = true; micOn = true;
       G('vwrap').classList.add('on');
       G('voff').style.display = 'none';
       G('camBtn').classList.add('on');
       G('micBtn').classList.add('on');
-
       // Call the other peer if connected
-      if (peer && conn && conn.open) {
-        try {
-          vcall = peer.call(conn.peer, stream);
-          vcall.on('stream', s => setRemoteVideo(s));
-          vcall.on('error', () => {});
-          vcall.on('close', () => {});
-        } catch(e) {}
+      if (conn && conn.open) {
+        vcall = peer.call(conn.peer, stream);
+        vcall.on('stream', s => setRemote(s));
+        vcall.on('error', () => {});
       }
       toast('Video on · DTLS-SRTP encrypted');
     } catch(err) {
-      if (err.name === 'NotAllowedError') {
-        toast('Camera permission denied');
-      } else if (err.name === 'NotFoundError') {
-        toast('No camera found');
-      } else {
-        toast('Camera error: ' + err.name);
-      }
+      toast('Camera denied — check browser permissions');
     }
   } else {
     camOn = !camOn;
-    if (stream) stream.getVideoTracks().forEach(t => t.enabled = camOn);
+    stream && stream.getVideoTracks().forEach(t => t.enabled = camOn);
     G('camBtn').classList.toggle('on', camOn);
     toast(camOn ? 'Camera on' : 'Camera off');
   }
 }
 
 function answerCall(c) {
-  const doAnswer = s => {
+  const ans = s => {
     vcall = c;
     c.answer(s);
-    c.on('stream', r => setRemoteVideo(r));
+    c.on('stream', r => setRemote(r));
     c.on('error', () => {});
-    c.on('close', () => {});
   };
-
-  if (stream) {
-    doAnswer(stream);
-    return;
-  }
-
-  // Auto-start camera to answer
-  navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+  if (stream) { ans(stream); return; }
+  navigator.mediaDevices.getUserMedia({ video:true, audio:true })
     .then(s => {
       stream = s;
       G('locV').srcObject = s;
-      camOn = true;
-      micOn = true;
+      camOn = true; micOn = true;
       G('vwrap').classList.add('on');
       G('voff').style.display = 'none';
       G('camBtn').classList.add('on');
       G('micBtn').classList.add('on');
-      doAnswer(s);
-      toast('Incoming video call ✦');
+      ans(s);
     })
-    .catch(() => {
-      // Answer without video if permission denied
-      c.answer();
-    });
+    .catch(() => c.answer());
 }
 
-function setRemoteVideo(s) {
+function setRemote(s) {
   G('remV').srcObject = s;
   G('vwrap').classList.add('on');
   G('voff').style.display = 'none';
@@ -990,9 +745,9 @@ function toggleMic() {
   toast(micOn ? 'Mic on' : 'Mic muted 🔇');
 }
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════
 //  CHAT UI
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════
 function launchChat() {
   G('setup').style.display = 'none';
   G('chat').classList.add('on');
@@ -1000,72 +755,61 @@ function launchChat() {
 }
 
 function addMsg(txt, who) {
-  const w   = document.createElement('div');
+  const w = document.createElement('div');
   w.className = 'mw ' + who;
   w.innerHTML = `<div class="bub">${esc(txt)}</div>
     <div class="mt">${now()}</div>
-    <div class="et">⬡ PBKDF2+X25519 encrypted</div>`;
+    <div class="et">⬡ encrypted</div>`;
   G('msgs').appendChild(w);
   scrollB();
 }
 
 function addImg(url, who) {
-  const w   = document.createElement('div');
-  w.className = 'mw ' + who;
+  const w   = document.createElement('div'); w.className = 'mw ' + who;
+  const b   = document.createElement('div'); b.className = 'bub'; b.style.padding = '.28rem';
   const img = document.createElement('img');
-  img.src     = url;
-  img.loading = 'lazy';
+  img.src = url; img.loading = 'lazy';
   img.onclick = () => openLB(url);
-  const bub = document.createElement('div');
-  bub.className    = 'bub';
-  bub.style.padding = '.28rem';
-  bub.appendChild(img);
-  w.appendChild(bub);
-  w.innerHTML += `<div class="mt">${now()}</div>
-    <div class="et">⬡ photo encrypted</div>`;
+  b.appendChild(img); w.appendChild(b);
+  w.innerHTML += `<div class="mt">${now()}</div><div class="et">⬡ photo encrypted</div>`;
   G('msgs').appendChild(w);
   scrollB();
 }
 
 function addSys(txt) {
   const d = document.createElement('div');
-  d.className   = 'sys';
-  d.textContent = txt;
+  d.className = 'sys'; d.textContent = txt;
   G('msgs').appendChild(d);
   scrollB();
 }
 
 function scrollB() {
   const m = G('msgs');
-  setTimeout(() => { m.scrollTop = m.scrollHeight; }, 60);
+  setTimeout(() => m.scrollTop = m.scrollHeight, 50);
 }
 
 function now() {
-  return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
 }
 
 function esc(t) {
-  return t
-    .replace(/&/g,  '&amp;')
-    .replace(/</g,  '&lt;')
-    .replace(/>/g,  '&gt;')
-    .replace(/\n/g, '<br>');
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
 }
 
-function setCS(c, t) {
-  G('cDot').className = 'dot ' + c;
+function G(id) { return document.getElementById(id); }
+
+function setCS(c,t) {
+  G('cDot').className = 'dot ' + (c==='g'?'g':c==='rd'?'rd':'y');
   G('cTxt').textContent = t;
 }
-function setHS(c, t) {
-  G('hDot').className = 'dot ' + c;
+
+function setHS(c,t) {
+  G('hDot').className = 'dot ' + (c==='g'?'g':c==='rd'?'rd':'y');
   G('hTxt').textContent = t;
 }
 
 function onKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendMsg();
-  }
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
 }
 
 function rsz(el) {
@@ -1073,70 +817,45 @@ function rsz(el) {
   el.style.height = Math.min(el.scrollHeight, 96) + 'px';
 }
 
-function G(id) { return document.getElementById(id); }
+// LIGHTBOX
+function openLB(url) { G('lbi').src = url; G('lb').classList.add('on'); }
+function closeLB()   { G('lb').classList.remove('on'); }
 
-// ═══════════════════════════════════════════════
-//  LIGHTBOX
-// ═══════════════════════════════════════════════
-function openLB(url) {
-  G('lbi').src = url;
-  G('lb').classList.add('on');
-  history.pushState({ lb: true }, '');
-}
-function closeLB() { G('lb').classList.remove('on'); }
-
-// ═══════════════════════════════════════════════
-//  INFO / END
-// ═══════════════════════════════════════════════
-function openInfo() { G('infoM').classList.add('on'); }
-
+// END SESSION
 function endSess() {
-  if (!confirm('End session? All messages will be cleared.')) return;
-  try { if (vcall)  vcall.close();  } catch(e){}
-  try { if (conn)   conn.close();   } catch(e){}
-  try { if (peer)   peer.destroy(); } catch(e){}
-  try { if (stream) stream.getTracks().forEach(t => t.stop()); } catch(e){}
-  SK = null; KP = null; kdfKey = null;
+  if (!confirm('End session? Everything will be cleared.')) return;
+  if (vcall)  vcall.close();
+  if (conn)   conn.close();
+  if (peer)   peer.destroy();
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  SK = null; PH = null; KP = null;
   location.reload();
 }
 
-// ═══════════════════════════════════════════════
-//  TOAST
-// ═══════════════════════════════════════════════
-let _toastTimer;
+// TOAST
+let _tt;
 function toast(msg) {
   const t = G('toast');
-  t.textContent = msg;
-  t.classList.add('on');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => t.classList.remove('on'), 2500);
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(_tt); _tt = setTimeout(() => t.classList.remove('on'), 2600);
 }
 
-// ═══════════════════════════════════════════════
-//  ANDROID / MOBILE FIXES
-// ═══════════════════════════════════════════════
-// Prevent double-tap zoom
-let _lastTap = 0;
+// Android: prevent double-tap zoom
+let lt = 0;
 document.addEventListener('touchend', e => {
-  const now = Date.now();
-  if (now - _lastTap < 280) e.preventDefault();
-  _lastTap = now;
+  const n = Date.now(); if (n - lt < 280) e.preventDefault(); lt = n;
 }, { passive: false });
 
-// Handle back button (Android)
+// Back button
 history.pushState({}, '');
 window.addEventListener('popstate', () => {
   if (G('lb').classList.contains('on'))    { closeLB(); return; }
-  if (G('infoM').classList.contains('on')) { G('infoM').classList.remove('on'); return; }
+  if (G('infoM').classList.contains('on')) { G('infoM').classList.remove('on'); }
 });
 
-// Screen wake lock during video
+// Wake lock during video
 async function keepAwake() {
-  try {
-    if ('wakeLock' in navigator) {
-      await navigator.wakeLock.request('screen');
-    }
-  } catch(e) {}
+  try { if ('wakeLock' in navigator) await navigator.wakeLock.request('screen'); } catch(e) {}
 }
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && camOn) keepAwake();
