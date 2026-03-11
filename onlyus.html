@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#07070f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-status-bar-style" content="black-translucent">
+<title>Only Us</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tweetnacl/1.0.3/nacl-fast.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tweetnacl-util/0.15.1/nacl-util.min.js"></script>
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=Fira+Code:wght@300;400&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+:root{
+  --bg:#07070f;--s1:#0e0e1a;--s2:#13131f;
+  --border:rgba(160,140,255,0.1);--border2:rgba(160,140,255,0.22);
+  --a1:#a08cff;--a2:#ff8cc8;--a3:#8cffd4;
+  --text:#ede9ff;--muted:#6a6485;--safe:#52e8a0;--danger:#ff6b6b;
+  --me-bg:linear-gradient(135deg,#3d2080,#7030c0);
+  --her-bg:rgba(255,255,255,0.055);
+}
+html{height:100%;height:-webkit-fill-available;}
+body{min-height:100vh;min-height:-webkit-fill-available;background:var(--bg);color:var(--text);
+  font-family:'Fira Code',monospace;display:flex;flex-direction:column;overflow:hidden;position:fixed;width:100%;}
+.bg-orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.1;animation:drift 22s infinite ease-in-out;}
+.orb1{width:420px;height:420px;background:var(--a1);top:-120px;left:-80px;}
+.orb2{width:320px;height:320px;background:var(--a2);bottom:-90px;right:-60px;animation-delay:-8s;}
+.orb3{width:260px;height:260px;background:var(--a3);top:45%;left:55%;animation-delay:-15s;}
+@keyframes drift{0%,100%{transform:translate(0,0);}33%{transform:translate(28px,-18px);}66%{transform:translate(-18px,28px);}}
+
+/* ── SCREENS ── */
+.screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  z-index:10;padding:1.2rem;overflow-y:auto;transition:opacity .35s,transform .35s;}
+.screen.hidden{opacity:0;pointer-events:none;transform:scale(.97);}
+
+/* ── WELCOME ── */
+#welcome{flex-direction:column;gap:1.4rem;align-items:center;}
+.brand h1{font-family:'Lora',serif;font-size:clamp(2.8rem,11vw,5.2rem);font-weight:400;font-style:italic;
+  line-height:1;background:linear-gradient(135deg,var(--a1),var(--a2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.brand p{font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);margin-top:.4rem;text-align:center;}
+.enc-pill{display:inline-flex;align-items:center;gap:.45rem;background:rgba(82,232,160,.07);
+  border:1px solid rgba(82,232,160,.18);color:var(--safe);padding:.35rem .9rem;border-radius:20px;
+  font-size:.57rem;letter-spacing:.16em;text-transform:uppercase;}
+
+.glass{background:rgba(14,14,26,.72);border:1px solid var(--border);border-radius:16px;
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);padding:1.55rem;
+  width:min(430px,100%);display:flex;flex-direction:column;gap:1.05rem;}
+.glass h2{font-family:'Lora',serif;font-size:1rem;font-weight:400;color:var(--a1);}
+
+label{display:block;font-size:.57rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem;}
+input,textarea{width:100%;background:rgba(255,255,255,.033);border:1px solid var(--border);color:var(--text);
+  font-family:'Fira Code',monospace;font-size:.82rem;padding:.7rem .95rem;border-radius:10px;outline:none;
+  transition:border-color .2s,background .2s;resize:none;-webkit-appearance:none;}
+input:focus,textarea:focus{border-color:var(--a1);background:rgba(160,140,255,.06);}
+textarea{min-height:42px;line-height:1.5;}
+input[type=password]{letter-spacing:.06em;}
+
+.btn-primary{width:100%;padding:.85rem;background:linear-gradient(135deg,var(--a1),var(--a2));
+  border:none;color:#fff;font-family:'Lora',serif;font-style:italic;font-size:1.05rem;
+  letter-spacing:.04em;cursor:pointer;border-radius:12px;transition:opacity .2s,transform .15s;}
+.btn-primary:active{transform:scale(.98);}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed;}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--a1);
+  font-family:'Fira Code',monospace;font-size:.68rem;letter-spacing:.1em;
+  padding:.62rem 1rem;cursor:pointer;border-radius:10px;transition:all .2s;width:100%;}
+.btn-ghost:hover{border-color:var(--a1);background:rgba(160,140,255,.08);}
+.btn-ghost:active{transform:scale(.97);}
+.row2{display:flex;gap:.6rem;}
+.row2 .btn-ghost{flex:1;}
+
+.divider{text-align:center;font-size:.57rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
+  display:flex;align-items:center;gap:.8rem;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+.code-box{background:rgba(160,140,255,.08);border:1px solid var(--border2);border-radius:12px;
+  padding:1rem 1.2rem;text-align:center;}
+.code-big{font-family:'Lora',serif;font-style:italic;font-size:2.4rem;letter-spacing:.35em;color:var(--a1);line-height:1;}
+.code-sub{font-size:.58rem;color:var(--muted);margin-top:.4rem;letter-spacing:.1em;}
+
+.hint{font-size:.61rem;color:var(--muted);line-height:1.75;padding:.6rem .85rem;
+  background:rgba(255,255,255,.02);border-left:2px solid rgba(160,140,255,.2);border-radius:0 8px 8px 0;}
+.hint strong{color:var(--a2);}
+
+.status-row{display:flex;align-items:center;gap:.5rem;font-size:.61rem;color:var(--muted);}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;animation:blink 2s infinite;}
+.dot.green{background:var(--safe);box-shadow:0 0 7px var(--safe);}
+.dot.yellow{background:#ffd060;box-shadow:0 0 7px #ffd060;}
+.dot.red{background:var(--danger);box-shadow:0 0 7px var(--danger);}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.25;}}
+
+/* ── CHAT SCREEN ── */
+#chatscreen{display:none;flex-direction:column;position:fixed;inset:0;z-index:10;
+  padding-bottom:env(safe-area-inset-bottom);}
+#chatscreen.active{display:flex;}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;
+  padding:.7rem 1rem;padding-top:calc(.7rem + env(safe-area-inset-top));
+  background:rgba(7,7,15,.9);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);flex-shrink:0;z-index:5;}
+.tl .name{font-family:'Lora',serif;font-style:italic;font-size:1rem;color:var(--a1);}
+.tl .conn{display:flex;align-items:center;gap:.35rem;font-size:.55rem;color:var(--muted);margin-top:.12rem;letter-spacing:.07em;}
+.tr{display:flex;gap:.42rem;align-items:center;}
+
+.ic{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.04);border:1px solid var(--border);
+  color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:.95rem;transition:all .2s;flex-shrink:0;}
+.ic:hover{background:rgba(160,140,255,.15);border-color:var(--a1);}
+.ic.on{background:rgba(160,140,255,.2);border-color:var(--a1);color:var(--a1);}
+.ic.end{background:rgba(255,80,80,.1);border-color:rgba(255,80,80,.25);color:var(--danger);}
+
+/* VIDEO */
+#videoArea{position:relative;background:#000;flex-shrink:0;display:none;overflow:hidden;max-height:36vh;}
+#videoArea.active{display:block;}
+#remoteVid{width:100%;height:100%;object-fit:cover;display:block;max-height:36vh;background:#000;}
+#localVid{position:absolute;bottom:.65rem;right:.65rem;width:78px;height:104px;
+  object-fit:cover;border-radius:10px;border:2px solid rgba(160,140,255,.4);
+  box-shadow:0 4px 18px rgba(0,0,0,.55);background:#111;}
+.vid-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:.5rem;color:var(--muted);font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;}
+.vid-ph span{font-size:2.2rem;opacity:.12;}
+
+/* MESSAGES */
+#messages{flex:1;overflow-y:auto;overflow-x:hidden;padding:.85rem;
+  display:flex;flex-direction:column;gap:.6rem;scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;}
+#messages::-webkit-scrollbar{width:2px;}
+#messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+.mw{display:flex;flex-direction:column;max-width:80%;}
+.mw.me{align-self:flex-end;align-items:flex-end;}
+.mw.her{align-self:flex-start;align-items:flex-start;}
+.bubble{padding:.6rem .88rem;word-break:break-word;font-size:.82rem;line-height:1.55;}
+.mw.me .bubble{background:var(--me-bg);border-radius:16px 16px 3px 16px;}
+.mw.her .bubble{background:var(--her-bg);border:1px solid var(--border);border-radius:16px 16px 16px 3px;}
+.bubble img{max-width:190px;max-height:210px;border-radius:10px;display:block;cursor:pointer;transition:opacity .2s;}
+.bubble img:active{opacity:.85;}
+.mw.me .bubble img{max-width:190px;}
+.mt{font-size:.51rem;color:var(--muted);margin-top:.18rem;letter-spacing:.04em;}
+.etick{font-size:.49rem;color:var(--safe);opacity:.5;letter-spacing:.07em;}
+.sys{align-self:center;font-size:.57rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;
+  padding:.32rem .85rem;background:rgba(255,255,255,.02);border-radius:20px;border:1px solid var(--border);}
+
+/* INPUT */
+.inputbar{padding:.6rem .8rem;padding-bottom:calc(.6rem + env(safe-area-inset-bottom));
+  background:rgba(7,7,15,.93);backdrop-filter:blur(24px);border-top:1px solid var(--border);flex-shrink:0;}
+.irow{display:flex;gap:.45rem;align-items:flex-end;}
+#msgInput{flex:1;min-height:40px;max-height:108px;padding:.62rem .88rem;
+  border-radius:20px;font-size:.82rem;line-height:1.45;overflow-y:auto;}
+.sbtn{width:40px;height:40px;flex-shrink:0;border-radius:50%;background:linear-gradient(135deg,var(--a1),var(--a2));
+  border:none;color:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:transform .15s;}
+.sbtn:active{transform:scale(.9);}
+.sbtn:disabled{opacity:.3;}
+.abtn{width:38px;height:38px;flex-shrink:0;border-radius:50%;background:rgba(255,255,255,.04);
+  border:1px solid var(--border);color:var(--muted);font-size:1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.abtn:hover,.abtn:active{border-color:var(--a1);color:var(--a1);}
+#fileInput{display:none;}
+
+/* TOAST */
+#toast{position:fixed;bottom:5.5rem;left:50%;transform:translateX(-50%) translateY(6px);
+  background:var(--s2);border:1px solid var(--border2);padding:.48rem 1.1rem;border-radius:20px;
+  font-size:.63rem;letter-spacing:.07em;white-space:nowrap;opacity:0;transition:all .27s;
+  pointer-events:none;z-index:999;max-width:88vw;text-align:center;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* MODAL */
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(12px);z-index:50;
+  display:flex;align-items:center;justify-content:center;padding:1.2rem;
+  opacity:0;pointer-events:none;transition:opacity .3s;}
+.mbg.open{opacity:1;pointer-events:all;}
+.modal{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:1.55rem;
+  width:min(390px,100%);display:flex;flex-direction:column;gap:1.05rem;max-height:88vh;overflow-y:auto;}
+.modal h3{font-family:'Lora',serif;font-style:italic;font-size:1.1rem;color:var(--a1);}
+
+/* LIGHTBOX */
+#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:100;
+  display:none;align-items:center;justify-content:center;cursor:pointer;}
+#lightbox.open{display:flex;}
+#lightboxImg{max-width:95vw;max-height:88vh;border-radius:10px;object-fit:contain;}
+</style>
+</head>
+<body>
+<div class="bg-orbs"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
+
+<!-- ══ WELCOME ══ -->
+<div class="screen" id="welcome">
+<div style="display:flex;flex-direction:column;align-items:center;gap:1.35rem;width:100%;max-width:440px;padding-bottom:.8rem;">
+
+  <div class="brand" style="text-align:center;">
+    <h1>Only Us</h1>
+    <p>end-to-end encrypted · peer to peer</p>
+  </div>
+
+  <div class="enc-pill">🔒 XSalsa20-Poly1305 · X25519 · libsodium</div>
+
+  <!-- SETUP CARD -->
+  <div class="glass" id="setupCard">
+    <h2>Start your private space</h2>
+    <div>
+      <label>Your name</label>
+      <input type="text" id="myName" placeholder="e.g. Rohan" maxlength="20" autocomplete="off" autocorrect="off" spellcheck="false"/>
+    </div>
+    <div>
+      <label>Shared passphrase <span style="color:var(--muted);font-size:.54rem;">(both of you use the same one)</span></label>
+      <input type="password" id="passphrase" placeholder="a secret only you two know…" autocomplete="new-password"/>
+    </div>
+    <div class="divider">connect by</div>
+    <div class="row2">
+      <button class="btn-ghost" onclick="showCreate()">✦ Create room</button>
+      <button class="btn-ghost" onclick="showJoin()">→ Join room</button>
+    </div>
+  </div>
+
+  <!-- CREATE ROOM CARD -->
+  <div class="glass hidden" id="createCard">
+    <h2>Your room code</h2>
+    <div class="code-box">
+      <div class="code-big" id="codeDisplay">······</div>
+      <div class="code-sub">share this with her — over WhatsApp, call, anything</div>
+    </div>
+    <div class="status-row"><span class="dot yellow" id="waitDot"></span><span id="waitTxt">Preparing…</span></div>
+    <div class="hint"><strong>How to connect:</strong><br>
+      1. You share this code with her<br>
+      2. She opens the app → taps "Join room" → enters code<br>
+      3. You're connected automatically — fully encrypted</div>
+    <button class="btn-ghost" onclick="copyCode()">📋 Copy room code</button>
+    <button class="btn-ghost" onclick="backToSetup()">← Back</button>
+  </div>
+
+  <!-- JOIN CARD -->
+  <div class="glass hidden" id="joinCard">
+    <h2>Join her room</h2>
+    <div>
+      <label>Room code she gave you</label>
+      <input type="text" id="joinInput" placeholder="e.g. ABCD12" maxlength="8"
+        autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+        oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/>
+    </div>
+    <button class="btn-primary" onclick="doJoin()">Connect →</button>
+    <button class="btn-ghost" onclick="backToSetup()">← Back</button>
+  </div>
+
+</div>
+</div>
+
+<!-- ══ CHAT ══ -->
+<div id="chatscreen">
+  <div class="topbar">
+    <div class="tl">
+      <div class="name">Only Us ✦</div>
+      <div class="conn"><span class="dot yellow" id="connDot"></span><span id="connTxt">connecting…</span></div>
+    </div>
+    <div class="tr">
+      <button class="ic" id="camBtn" onclick="toggleCam()" title="Video">📷</button>
+      <button class="ic" id="micBtn" onclick="toggleMic()" title="Mic">🎙️</button>
+      <button class="ic" onclick="openInfo()" title="Security">🔒</button>
+      <button class="ic end" onclick="endSession()" title="End">✕</button>
+    </div>
+  </div>
+
+  <div id="videoArea">
+    <div class="vid-ph" id="vidPh"><span>📷</span><div>video off</div></div>
+    <video id="remoteVid" autoplay playsinline></video>
+    <video id="localVid" autoplay playsinline muted></video>
+  </div>
+
+  <div id="messages"></div>
+
+  <div class="inputbar">
+    <div class="irow">
+      <input type="file" id="fileInput" accept="image/*" onchange="sendImg(event)"/>
+      <button class="abtn" onclick="document.getElementById('fileInput').click()" title="Image">📎</button>
+      <textarea id="msgInput" placeholder="Write something…" rows="1"
+        onkeydown="onKey(event)" oninput="resize(this)"></textarea>
+      <button class="sbtn" id="sendBtn" onclick="sendMsg()">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ INFO MODAL ══ -->
+<div class="mbg" id="infoModal">
+  <div class="modal">
+    <h3>🔒 Your privacy</h3>
+    <div style="font-size:.69rem;line-height:1.9;color:var(--muted);">
+      <p><strong style="color:var(--a1);">X25519 key exchange</strong><br>Your keys are generated on your device each session. A shared secret is derived mathematically — it never travels anywhere.</p>
+      <p style="margin-top:.75rem;"><strong style="color:var(--a1);">XSalsa20-Poly1305 (libsodium secretbox)</strong><br>Every message and every photo is encrypted before leaving your device. Each uses a unique random nonce — the gold standard.</p>
+      <p style="margin-top:.75rem;"><strong style="color:var(--a1);">WebRTC DTLS-SRTP</strong><br>All video and voice is encrypted at the browser level. Not even the relay sees your face.</p>
+      <p style="margin-top:.75rem;"><strong style="color:var(--a1);">PeerJS relay</strong><br>Sees two anonymous IDs connect — nothing else. After handshake it's peer-to-peer. No message data passes through it.</p>
+      <p style="margin-top:.75rem;"><strong style="color:var(--a1);">No storage</strong><br>Nothing is saved. Close the tab — everything is gone forever.</p>
+    </div>
+    <button class="btn-primary" onclick="document.getElementById('infoModal').classList.remove('open')">Got it</button>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" onclick="closeLB()"><img id="lightboxImg" src="" alt=""/></div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+// ════════════════════════════════
+//  CRYPTO
+// ════════════════════════════════
+let KP = null;   // my key pair
+let SK = null;   // shared key (32 bytes)
+
+function genKP(){ KP = nacl.box.keyPair(); }
+
+function deriveShared(theirPub64, pass){
+  const their = nacl.util.decodeBase64(theirPub64);
+  const dh    = nacl.scalarMult(KP.secretKey, their);
+  if(pass && pass.trim()){
+    const pw  = nacl.util.decodeUTF8(pass.trim());
+    const mix = new Uint8Array(dh.length + pw.length);
+    mix.set(dh); mix.set(pw, dh.length);
+    return nacl.hash(mix).slice(0,32);
+  }
+  return dh;
+}
+
+function enc(text){
+  const n = nacl.randomBytes(nacl.secretbox.nonceLength);
+  const b = nacl.secretbox(nacl.util.decodeUTF8(text), n, SK);
+  return nacl.util.encodeBase64(n)+'.'+nacl.util.encodeBase64(b);
+}
+
+function dec(payload){
+  try{
+    const i=payload.indexOf('.');
+    const opened=nacl.secretbox.open(
+      nacl.util.decodeBase64(payload.slice(i+1)),
+      nacl.util.decodeBase64(payload.slice(0,i)),SK);
+    return opened ? nacl.util.encodeUTF8(opened) : null;
+  }catch(e){return null;}
+}
+
+function encBytes(bytes){
+  const n=nacl.randomBytes(nacl.secretbox.nonceLength);
+  const b=nacl.secretbox(bytes,n,SK);
+  return nacl.util.encodeBase64(n)+'.'+nacl.util.encodeBase64(b);
+}
+
+function decBytes(payload){
+  try{
+    const i=payload.indexOf('.');
+    return nacl.secretbox.open(
+      nacl.util.decodeBase64(payload.slice(i+1)),
+      nacl.util.decodeBase64(payload.slice(0,i)),SK);
+  }catch(e){return null;}
+}
+
+// ════════════════════════════════
+//  STATE
+// ════════════════════════════════
+let peer=null, conn=null, call=null, stream=null;
+let roomCode='', myName='Me', passphrase='';
+let camOn=false, micOn=false;
+
+// ════════════════════════════════
+//  ROOM CODE
+// ════════════════════════════════
+function makeCode(){
+  const C='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const r=nacl.randomBytes(6);
+  return Array.from(r,b=>C[b%C.length]).join('');
+}
+
+// ════════════════════════════════
+//  NAV
+// ════════════════════════════════
+function validate(){
+  const n=document.getElementById('myName').value.trim();
+  const p=document.getElementById('passphrase').value.trim();
+  if(!n){showToast('Enter your name first');return false;}
+  if(!p){showToast('Enter a shared passphrase');return false;}
+  myName=n; passphrase=p;
+  return true;
+}
+
+function showCreate(){
+  if(!validate())return;
+  hide('setupCard'); show('createCard');
+  genKP();
+  roomCode=makeCode();
+  document.getElementById('codeDisplay').textContent=roomCode;
+  initHost();
+}
+
+function showJoin(){
+  if(!validate())return;
+  hide('setupCard'); show('joinCard');
+}
+
+function backToSetup(){
+  hide('createCard'); hide('joinCard'); show('setupCard');
+  if(peer){peer.destroy();peer=null;}
+}
+
+function copyCode(){
+  if(!roomCode)return;
+  navigator.clipboard.writeText(roomCode)
+    .then(()=>showToast('Room code copied! Share it with her ✦'))
+    .catch(()=>showToast('Code: '+roomCode));
+}
+
+function hide(id){document.getElementById(id).classList.add('hidden');}
+function show(id){document.getElementById(id).classList.remove('hidden');}
+
+// ════════════════════════════════
+//  PEERJS HOST
+// ════════════════════════════════
+function initHost(){
+  setWait('yellow','Waiting for her to join…');
+  const hostID='onlyus-'+roomCode.toLowerCase()+'-h';
+  peer=new Peer(hostID,{debug:0});
+  peer.on('open',()=>setWait('green','Ready — waiting for her'));
+  peer.on('connection',c=>{conn=c;wireConn('host');});
+  peer.on('call',handleCall);
+  peer.on('error',e=>{
+    if(e.type==='unavailable-id'){
+      // Room code taken, make new one
+      roomCode=makeCode();
+      document.getElementById('codeDisplay').textContent=roomCode;
+      peer.destroy();
+      setTimeout(initHost,500);
+    } else {
+      setWait('red','Error — try refreshing');
+    }
+  });
+}
+
+// ════════════════════════════════
+//  PEERJS GUEST
+// ════════════════════════════════
+function doJoin(){
+  const code=document.getElementById('joinInput').value.trim().toUpperCase();
+  if(code.length<4){showToast('Enter the room code');return;}
+  roomCode=code;
+  genKP();
+  const guestID='onlyus-'+code.toLowerCase()+'-g'+Date.now().toString(36).slice(-4);
+  const hostID ='onlyus-'+code.toLowerCase()+'-h';
+  peer=new Peer(guestID,{debug:0});
+  peer.on('open',()=>{
+    conn=peer.connect(hostID,{reliable:true,serialization:'json'});
+    wireConn('guest');
+  });
+  peer.on('call',handleCall);
+  peer.on('error',e=>{
+    if(e.type==='peer-unavailable'){showToast('Room not found — check the code');}
+    else{showToast('Error: '+e.type);}
+  });
+}
+
+// ════════════════════════════════
+//  DATA CHANNEL
+// ════════════════════════════════
+function wireConn(role){
+  conn.on('open',()=>{
+    // Send my public key
+    conn.send({t:'KEY',k:nacl.util.encodeBase64(KP.publicKey),n:myName});
+    setConn('yellow','exchanging keys…');
+  });
+  conn.on('data',onData);
+  conn.on('close',()=>{setConn('red','disconnected');addSys('Session ended');});
+  conn.on('error',()=>{setConn('red','connection error');});
+}
+
+function onData(msg){
+  if(!msg||!msg.t)return;
+  if(msg.t==='KEY'){
+    SK=deriveShared(msg.k, passphrase);
+    launchChat();
+    setConn('green','encrypted · connected');
+    addSys('✦ Connected · all messages end-to-end encrypted');
+    return;
+  }
+  if(msg.t==='MSG'){
+    const p=dec(msg.d);
+    if(p!==null)addMsg(p,'her');
+    return;
+  }
+  if(msg.t==='IMG'){
+    const b=decBytes(msg.d);
+    if(b){
+      const url=URL.createObjectURL(new Blob([b],{type:msg.m||'image/jpeg'}));
+      addImg(url,'her');
+    }
+    return;
+  }
+}
+
+// ════════════════════════════════
+//  SEND
+// ════════════════════════════════
+function sendMsg(){
+  const el=document.getElementById('msgInput');
+  const txt=el.value.trim();
+  if(!txt)return;
+  if(!isOpen()){showToast('Not connected yet');return;}
+  conn.send({t:'MSG',d:enc(txt)});
+  addMsg(txt,'me');
+  el.value='';el.style.height='auto';
+}
+
+function sendImg(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  if(!isOpen()){showToast('Not connected yet');return;}
+  if(file.size>6*1024*1024){showToast('Image too large (max 6MB)');return;}
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const bytes=new Uint8Array(ev.target.result);
+    conn.send({t:'IMG',d:encBytes(bytes),m:file.type});
+    const url=URL.createObjectURL(file);
+    addImg(url,'me');
+    showToast('Photo sent ✦ encrypted');
+  };
+  reader.readAsArrayBuffer(file);
+  e.target.value='';
+}
+
+function isOpen(){return conn&&conn.open&&SK;}
+
+// ════════════════════════════════
+//  VIDEO
+// ════════════════════════════════
+async function toggleCam(){
+  if(!camOn){
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+      document.getElementById('localVid').srcObject=stream;
+      camOn=true;micOn=true;
+      document.getElementById('camBtn').classList.add('on');
+      document.getElementById('micBtn').classList.add('on');
+      document.getElementById('videoArea').classList.add('active');
+      document.getElementById('vidPh').style.display='none';
+      // Call peer if connected
+      if(peer&&conn&&conn.open){
+        call=peer.call(conn.peer,stream);
+        call.on('stream',s=>setRemote(s));
+        call.on('error',()=>{});
+      }
+      showToast('Camera on · DTLS-SRTP encrypted');
+    }catch(err){
+      showToast('Camera access denied');
+    }
+  } else {
+    camOn=!camOn;
+    stream&&stream.getVideoTracks().forEach(t=>t.enabled=camOn);
+    document.getElementById('camBtn').classList.toggle('on',camOn);
+    showToast(camOn?'Camera on':'Camera paused');
+  }
+}
+
+function handleCall(c){
+  const answer=s=>{
+    call=c; c.answer(s);
+    c.on('stream',remote=>setRemote(remote));
+    c.on('error',()=>{});
+  };
+  if(stream){answer(stream);return;}
+  navigator.mediaDevices.getUserMedia({video:true,audio:true})
+    .then(s=>{
+      stream=s;
+      document.getElementById('localVid').srcObject=s;
+      camOn=true;micOn=true;
+      document.getElementById('camBtn').classList.add('on');
+      document.getElementById('micBtn').classList.add('on');
+      document.getElementById('videoArea').classList.add('active');
+      document.getElementById('vidPh').style.display='none';
+      answer(s);
+    })
+    .catch(()=>c.answer());
+}
+
+function setRemote(s){
+  const v=document.getElementById('remoteVid');
+  v.srcObject=s;
+  document.getElementById('videoArea').classList.add('active');
+  document.getElementById('vidPh').style.display='none';
+}
+
+function toggleMic(){
+  if(!stream){showToast('Start camera first');return;}
+  micOn=!micOn;
+  stream.getAudioTracks().forEach(t=>t.enabled=micOn);
+  document.getElementById('micBtn').classList.toggle('on',micOn);
+  showToast(micOn?'Mic on':'Mic muted 🔇');
+}
+
+// ════════════════════════════════
+//  CHAT UI
+// ════════════════════════════════
+function launchChat(){
+  document.getElementById('welcome').classList.add('hidden');
+  document.getElementById('chatscreen').classList.add('active');
+  scrollBottom();
+}
+
+function addMsg(text,who){
+  const wrap=document.createElement('div');
+  wrap.className='mw '+who;
+  const t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  wrap.innerHTML=`<div class="bubble">${esc(text)}</div>
+    <div class="mt">${t}</div><div class="etick">⬡ encrypted</div>`;
+  msgs().appendChild(wrap); scrollBottom();
+}
+
+function addImg(url,who){
+  const wrap=document.createElement('div');
+  wrap.className='mw '+who;
+  const t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const img=document.createElement('img');
+  img.src=url;
+  img.onclick=()=>openLB(url);
+  img.loading='lazy';
+  const bub=document.createElement('div');
+  bub.className='bubble';
+  bub.style.padding='.3rem';
+  bub.appendChild(img);
+  wrap.appendChild(bub);
+  wrap.innerHTML+=`<div class="mt">${t}</div><div class="etick">⬡ photo encrypted</div>`;
+  msgs().appendChild(wrap); scrollBottom();
+}
+
+function addSys(text){
+  const d=document.createElement('div');
+  d.className='sys';d.textContent=text;
+  msgs().appendChild(d); scrollBottom();
+}
+
+function msgs(){return document.getElementById('messages');}
+function scrollBottom(){
+  const m=msgs();
+  setTimeout(()=>m.scrollTop=m.scrollHeight,60);
+}
+
+function setConn(color,text){
+  const d=document.getElementById('connDot');
+  d.className='dot '+(color==='green'?'green':color==='red'?'red':'yellow');
+  document.getElementById('connTxt').textContent=text;
+}
+function setWait(color,text){
+  const d=document.getElementById('waitDot');
+  d.className='dot '+(color==='green'?'green':color==='red'?'red':'yellow');
+  document.getElementById('waitTxt').textContent=text;
+}
+
+function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
+function resize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,108)+'px';}
+function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
+
+// ════════════════════════════════
+//  LIGHTBOX
+// ════════════════════════════════
+function openLB(url){
+  document.getElementById('lightboxImg').src=url;
+  document.getElementById('lightbox').classList.add('open');
+  history.pushState({lb:true},'');
+}
+function closeLB(){
+  document.getElementById('lightbox').classList.remove('open');
+}
+
+// ════════════════════════════════
+//  MISC
+// ════════════════════════════════
+function openInfo(){document.getElementById('infoModal').classList.add('open');}
+
+function endSession(){
+  if(!confirm('End session? Everything will be cleared.'))return;
+  if(call)call.close();
+  if(conn)conn.close();
+  if(peer)peer.destroy();
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  SK=null;KP=null;
+  location.reload();
+}
+
+let _tt;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),2700);
+}
+
+// Back button
+window.addEventListener('popstate',e=>{
+  const lb=document.getElementById('lightbox');
+  if(lb.classList.contains('open')){closeLB();return;}
+});
+history.pushState({},'');
+
+// Prevent double-tap zoom on Android
+let lastT=0;
+document.addEventListener('touchend',e=>{
+  const now=Date.now();
+  if(now-lastT<300){e.preventDefault();}
+  lastT=now;
+},{passive:false});
+
+// Keep screen awake during video
+let wakeLock=null;
+async function requestWakeLock(){
+  try{if('wakeLock' in navigator){wakeLock=await navigator.wakeLock.request('screen');}}catch(e){}
+}
+document.addEventListener('visibilitychange',async()=>{
+  if(wakeLock&&document.visibilityState==='visible')await requestWakeLock();
+});
+</script>
+</body>
+</html>
