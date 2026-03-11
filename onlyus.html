@@ -21,7 +21,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);
   font-family:'Inter',system-ui,sans-serif;overflow:hidden;}
 
 #setup{height:100%;display:flex;align-items:center;justify-content:center;
-  padding:1rem;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+  padding:1rem;overflow-y:auto;}
 .si{width:100%;max-width:340px;display:flex;flex-direction:column;gap:.9rem;}
 .logo{text-align:center;}
 .logo h1{font-size:2rem;font-weight:300;}
@@ -31,36 +31,30 @@ html,body{height:100%;background:var(--bg);color:var(--txt);
   color:var(--safe);letter-spacing:.1em;text-transform:uppercase;
   background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.18);
   padding:.26rem .7rem;border-radius:20px;}
-
 .card{background:var(--card);border:1px solid var(--bor);border-radius:var(--r);
   padding:1.2rem;display:flex;flex-direction:column;gap:.8rem;}
 .ct{font-size:.63rem;font-weight:500;color:var(--a);letter-spacing:.1em;text-transform:uppercase;}
-
 .f label{display:block;font-size:.58rem;color:var(--sub);letter-spacing:.1em;
   text-transform:uppercase;margin-bottom:.24rem;}
 .f input{width:100%;background:var(--inp);border:1px solid var(--bor);color:var(--txt);
   font-family:inherit;font-size:.88rem;padding:.62rem .82rem;border-radius:9px;
   outline:none;transition:border-color .2s;-webkit-appearance:none;}
 .f input:focus{border-color:var(--a);}
-
 .pw-wrap{position:relative;display:flex;align-items:center;}
 .pw-wrap input{padding-right:2.6rem;}
 .eye{position:absolute;right:.65rem;background:none;border:none;color:var(--sub);
   cursor:pointer;font-size:.95rem;padding:.2rem;line-height:1;transition:color .2s;}
 .eye:hover{color:var(--a);}
-
 .smeter{display:flex;gap:.18rem;margin-top:.26rem;}
 .sm{flex:1;height:3px;border-radius:3px;background:var(--inp);transition:background .25s;}
 .sw{background:var(--danger);}.so{background:var(--warn);}.sg{background:var(--safe);}
 .slbl{font-size:.55rem;color:var(--sub);margin-top:.15rem;}
-
 .kpw{display:none;flex-direction:column;gap:.26rem;}
 .kpw.on{display:flex;}
 .kpl{display:flex;justify-content:space-between;font-size:.58rem;color:var(--sub);}
 .kpl b{color:var(--a);}
 .kpb-bg{width:100%;height:3px;background:var(--inp);border-radius:3px;overflow:hidden;}
 .kpb{height:100%;width:0%;border-radius:3px;background:linear-gradient(90deg,var(--a),#f472b6);transition:width .1s;}
-
 .btn{width:100%;padding:.7rem;border:none;border-radius:9px;font-family:inherit;
   font-size:.88rem;font-weight:500;cursor:pointer;transition:opacity .15s,transform .1s;}
 .btn:active{transform:scale(.97);}
@@ -71,27 +65,18 @@ html,body{height:100%;background:var(--bg);color:var(--txt);
 .r2{display:flex;gap:.5rem;}.r2 .btn{flex:1;}
 .or{display:flex;align-items:center;gap:.6rem;font-size:.58rem;color:var(--sub);}
 .or::before,.or::after{content:'';flex:1;height:1px;background:var(--bor);}
-
 .cdisp{background:var(--inp);border:1px solid var(--bor);border-radius:9px;
   padding:.9rem;text-align:center;}
 .cbig{font-size:1.9rem;font-weight:300;letter-spacing:.35em;color:var(--a);font-family:monospace;}
 .csub{font-size:.58rem;color:var(--sub);margin-top:.26rem;}
-
 .sl{display:flex;align-items:center;gap:.4rem;font-size:.63rem;color:var(--sub);}
-.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;animation:bk 2s infinite;}
-.g{background:var(--safe);box-shadow:0 0 5px var(--safe);}
-.y{background:var(--warn);box-shadow:0 0 5px var(--warn);}
-.rd{background:var(--danger);box-shadow:0 0 5px var(--danger);}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;animation:bk 2s infinite;}
+.g{background:var(--safe);box-shadow:0 0 6px var(--safe);}
+.y{background:var(--warn);box-shadow:0 0 6px var(--warn);}
+.rd{background:var(--danger);box-shadow:0 0 6px var(--danger);}
 @keyframes bk{0%,100%{opacity:1}50%{opacity:.15}}
-
-/* connection steps */
-.steps{display:flex;flex-direction:column;gap:.4rem;}
-.step{display:flex;align-items:center;gap:.5rem;font-size:.65rem;color:var(--sub);
-  padding:.4rem .6rem;border-radius:7px;background:var(--inp);border:1px solid var(--bor);}
-.step.done{color:var(--safe);border-color:rgba(74,222,128,.2);}
-.step.active{color:var(--txt);border-color:var(--a);}
-.step.err{color:var(--danger);border-color:rgba(248,113,113,.2);}
-.step-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:currentColor;}
+.dbg{font-size:.6rem;color:var(--sub);background:rgba(0,0,0,.3);border-radius:7px;
+  padding:.4rem .6rem;line-height:1.6;font-family:monospace;max-height:80px;overflow-y:auto;}
 
 /* CHAT */
 #chat{display:none;height:100%;}
@@ -117,7 +102,6 @@ html,body{height:100%;background:var(--bg);color:var(--txt);
   font-size:.78rem;transition:all .18s;flex-shrink:0;}
 .ic:hover,.ic.on{background:rgba(139,124,248,.18);border-color:var(--a);color:var(--a);}
 .ic.red{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.25);color:var(--danger);}
-
 #vwrap{position:relative;background:#000;display:none;overflow:hidden;}
 #vwrap.on{display:block;}
 @media(orientation:portrait){#vwrap.on{height:36vmin;max-height:200px;}}
@@ -127,7 +111,6 @@ html,body{height:100%;background:var(--bg);color:var(--txt);
 .voff{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   flex-direction:column;gap:.3rem;color:var(--sub);font-size:.6rem;}
 .voff i{font-size:1.5rem;opacity:.13;font-style:normal;}
-
 #msgs{flex:1;overflow-y:auto;padding:.68rem;display:flex;flex-direction:column;gap:.42rem;
   scroll-behavior:smooth;-webkit-overflow-scrolling:touch;}
 #msgs::-webkit-scrollbar{width:2px;}
@@ -143,7 +126,6 @@ html,body{height:100%;background:var(--bg);color:var(--txt);
 .et{font-size:.47rem;color:var(--safe);opacity:.45;}
 .sys{align-self:center;font-size:.56rem;color:var(--sub);padding:.2rem .62rem;
   background:var(--inp);border-radius:20px;border:1px solid var(--bor);text-align:center;}
-
 .ibar{padding:.52rem .68rem;padding-bottom:calc(.52rem + env(safe-area-inset-bottom));
   background:var(--bg);border-top:1px solid var(--bor);flex-shrink:0;}
 .ir{display:flex;gap:.36rem;align-items:flex-end;}
@@ -160,13 +142,11 @@ html,body{height:100%;background:var(--bg);color:var(--txt);
   display:flex;align-items:center;justify-content:center;transition:all .18s;}
 .att:active{border-color:var(--a);color:var(--a);}
 #fi{display:none;}
-
 #toast{position:fixed;bottom:4.5rem;left:50%;transform:translateX(-50%) translateY(4px);
   background:var(--card);border:1px solid var(--bor);padding:.38rem .9rem;border-radius:18px;
-  font-size:.65rem;white-space:nowrap;opacity:0;transition:all .22s;pointer-events:none;
-  z-index:99;max-width:88vw;text-align:center;word-break:break-word;white-space:normal;}
+  font-size:.65rem;opacity:0;transition:all .22s;pointer-events:none;
+  z-index:99;max-width:88vw;text-align:center;}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
-
 .mbg{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);
   z-index:50;display:flex;align-items:center;justify-content:center;padding:1rem;
   opacity:0;pointer-events:none;transition:opacity .22s;}
@@ -179,7 +159,6 @@ html,body{height:100%;background:var(--bg);color:var(--txt);
 .minfo b{color:var(--txt);}
 .chip{display:inline-block;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);
   color:var(--safe);padding:.1rem .42rem;border-radius:5px;font-size:.56rem;margin:.08rem;}
-
 #lb{position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:100;
   display:none;align-items:center;justify-content:center;cursor:pointer;}
 #lb.on{display:flex;}
@@ -190,7 +169,6 @@ html,body{height:100%;background:var(--bg);color:var(--txt);
 
 <div id="setup">
 <div class="si">
-
   <div class="logo">
     <h1>Only <b>Us</b></h1>
     <p>end-to-end encrypted</p>
@@ -234,11 +212,8 @@ html,body{height:100%;background:var(--bg);color:var(--txt);
       <div class="cbig" id="codeOut">——</div>
       <div class="csub">Share this code with them</div>
     </div>
-    <div class="steps" id="hostSteps">
-      <div class="step active" id="hs1"><span class="step-dot"></span>Connecting to relay…</div>
-      <div class="step" id="hs2"><span class="step-dot"></span>Waiting for them to join…</div>
-      <div class="step" id="hs3"><span class="step-dot"></span>Exchanging keys…</div>
-    </div>
+    <div class="sl"><span class="dot y" id="hDot"></span><span id="hTxt">Connecting…</span></div>
+    <div class="dbg" id="hDbg">Starting…</div>
     <button class="btn bs" onclick="copyCode()">Copy code</button>
     <button class="btn bs" onclick="goBack()">← Back</button>
   </div>
@@ -251,19 +226,15 @@ html,body{height:100%;background:var(--bg);color:var(--txt);
         autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
         oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/>
     </div>
-    <div class="steps" id="joinSteps" style="display:none;">
-      <div class="step active" id="js1"><span class="step-dot"></span>Connecting to relay…</div>
-      <div class="step" id="js2"><span class="step-dot"></span>Finding room…</div>
-      <div class="step" id="js3"><span class="step-dot"></span>Exchanging keys…</div>
-    </div>
-    <button class="btn bp" id="joinConnBtn" onclick="doJoin()">Connect →</button>
+    <div class="sl"><span class="dot y" id="jDot" style="display:none"></span><span id="jTxt"></span></div>
+    <div class="dbg" id="jDbg" style="display:none;">Starting…</div>
+    <button class="btn bp" id="joinBtn2" onclick="doJoin()">Connect →</button>
     <button class="btn bs" onclick="goBack()">← Back</button>
   </div>
 
 </div>
 </div>
 
-<!-- CHAT -->
 <div id="chat">
   <div id="vcol">
     <div id="topbar">
@@ -303,14 +274,14 @@ html,body{height:100%;background:var(--bg);color:var(--txt);
     <h3>🔒 Security</h3>
     <div class="minfo">
       <p><b>Password → 256-bit key</b><br>
-      <span class="chip">PBKDF2-SHA512</span> 600,000 iterations. Even a short password becomes a 256-bit key uncrackable by any machine.</p>
+      <span class="chip">PBKDF2-SHA512</span> 600,000 iterations.</p>
       <p style="margin-top:.6rem;"><b>Key exchange</b><br>
-      <span class="chip">X25519 ECDH</span> Private key never leaves your device.</p>
+      <span class="chip">X25519 ECDH</span> Private key never leaves device.</p>
       <p style="margin-top:.6rem;"><b>Messages &amp; photos</b><br>
-      <span class="chip">XSalsa20-Poly1305</span> Same as Signal. Unique nonce every message.</p>
-      <p style="margin-top:.6rem;"><b>Video &amp; voice</b><br>
-      <span class="chip">DTLS-SRTP</span> Browser E2EE. Relay sees nothing.</p>
-      <p style="margin-top:.6rem;"><b>No storage</b> — Close tab = gone forever.</p>
+      <span class="chip">XSalsa20-Poly1305</span> Same as Signal.</p>
+      <p style="margin-top:.6rem;"><b>Video</b><br>
+      <span class="chip">DTLS-SRTP</span> WebRTC E2EE.</p>
+      <p style="margin-top:.6rem;"><b>No storage</b> — Close tab = gone.</p>
     </div>
     <button class="btn bp" onclick="G('infoM').classList.remove('on')">Got it</button>
   </div>
@@ -322,393 +293,255 @@ html,body{height:100%;background:var(--bg);color:var(--txt);
 <script>
 'use strict';
 
-// ═══════════════════════════════════════
-//  PEERJS CONFIG — multiple STUN servers
-//  for reliable cross-network connections
-// ═══════════════════════════════════════
-const PEER_CONFIG = {
-  debug: 0,
-  config: {
-    iceServers: [
-      { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:stun1.l.google.com:19302' },
-      { urls: 'stun:stun2.l.google.com:19302' },
-      { urls: 'stun:stun3.l.google.com:19302' },
-      { urls: 'stun:stun4.l.google.com:19302' },
-      { urls: 'stun:stun.cloudflare.com:3478' },
-      { urls: 'stun:stun.nextcloud.com:3478' },
-      // Free TURN server for when STUN fails (different networks)
-      {
-        urls:       'turn:openrelay.metered.ca:80',
-        username:   'openrelayproject',
-        credential: 'openrelayproject'
-      },
-      {
-        urls:       'turn:openrelay.metered.ca:443',
-        username:   'openrelayproject',
-        credential: 'openrelayproject'
-      },
-      {
-        urls:       'turn:openrelay.metered.ca:443?transport=tcp',
-        username:   'openrelayproject',
-        credential: 'openrelayproject'
-      }
-    ],
-    iceCandidatePoolSize: 10
-  }
-};
-
-// ═══════════════════════════════════════
-//  KDF: PBKDF2-SHA512 → 256-bit key
-// ═══════════════════════════════════════
-const KDF_SALT = new TextEncoder().encode('onlyus-v4-2024');
-const KDF_ITER = 600000;
-
+// ─── KDF ────────────────────────────────────────────
+const KDF_SALT = new TextEncoder().encode('onlyus-v5-2024');
 async function deriveKey(pass) {
-  setProg(true, 5); await tick();
+  setProg(true,5); await tick();
   const mat = await crypto.subtle.importKey(
-    'raw', new TextEncoder().encode(pass.trim()),
-    'PBKDF2', false, ['deriveBits']
-  );
-  setProg(true, 20); await tick();
+    'raw', new TextEncoder().encode(pass.trim()), 'PBKDF2', false, ['deriveBits']);
+  setProg(true,20); await tick();
   const bits = await crypto.subtle.deriveBits(
-    { name:'PBKDF2', hash:'SHA-512', salt:KDF_SALT, iterations:KDF_ITER },
-    mat, 256
-  );
-  setProg(true, 100); await tick(80);
-  setProg(false, 0);
+    {name:'PBKDF2',hash:'SHA-512',salt:KDF_SALT,iterations:600000}, mat, 256);
+  setProg(true,100); await tick(80); setProg(false,0);
   return new Uint8Array(bits);
 }
+function setProg(on,p){G('kpw').classList.toggle('on',on);G('kpb').style.width=p+'%';G('kpct').textContent=p+'%';}
+function tick(ms=10){return new Promise(r=>setTimeout(r,ms));}
 
-function setProg(on, p) {
-  G('kpw').classList.toggle('on', on);
-  G('kpb').style.width = p + '%';
-  G('kpct').textContent = p + '%';
-}
-function tick(ms=10) { return new Promise(r => setTimeout(r, ms)); }
-
-// ═══════════════════════════════════════
-//  CRYPTO
-// ═══════════════════════════════════════
+// ─── CRYPTO ─────────────────────────────────────────
 let KP=null, SK=null, PH=null;
+function genKP(){KP=nacl.box.keyPair();}
+function buildSK(pub64,kdfKey){
+  const dh=nacl.scalarMult(KP.secretKey,nacl.util.decodeBase64(pub64));
+  const mix=new Uint8Array(64); mix.set(dh,0); mix.set(kdfKey,32);
+  return nacl.hash(mix).slice(0,32);
+}
+function enc(t){const n=nacl.randomBytes(24);return b64(n)+'.'+b64(nacl.secretbox(utf8(t),n,SK));}
+function dec(p){try{const i=p.indexOf('.');const o=nacl.secretbox.open(db64(p.slice(i+1)),db64(p.slice(0,i)),SK);return o?nacl.util.encodeUTF8(o):null;}catch(e){return null;}}
+function encB(b){const n=nacl.randomBytes(24);return b64(n)+'.'+b64(nacl.secretbox(b,n,SK));}
+function decB(p){try{const i=p.indexOf('.');return nacl.secretbox.open(db64(p.slice(i+1)),db64(p.slice(0,i)),SK);}catch(e){return null;}}
+const b64=nacl.util.encodeBase64, db64=nacl.util.decodeBase64, utf8=nacl.util.decodeUTF8;
 
-function genKP() { KP = nacl.box.keyPair(); }
-
-function buildSK(pub64, kdfKey) {
-  const dh  = nacl.scalarMult(KP.secretKey, nacl.util.decodeBase64(pub64));
-  const mix = new Uint8Array(64);
-  mix.set(dh, 0); mix.set(kdfKey, 32);
-  return nacl.hash(mix).slice(0, 32);
-}
-
-function enc(t) {
-  const n=nacl.randomBytes(24);
-  return nacl.util.encodeBase64(n)+'.'+nacl.util.encodeBase64(nacl.secretbox(nacl.util.decodeUTF8(t),n,SK));
-}
-function dec(p) {
-  try {
-    const i=p.indexOf('.');
-    const o=nacl.secretbox.open(nacl.util.decodeBase64(p.slice(i+1)),nacl.util.decodeBase64(p.slice(0,i)),SK);
-    return o?nacl.util.encodeUTF8(o):null;
-  } catch(e){return null;}
-}
-function encB(b) {
-  const n=nacl.randomBytes(24);
-  return nacl.util.encodeBase64(n)+'.'+nacl.util.encodeBase64(nacl.secretbox(b,n,SK));
-}
-function decB(p) {
-  try {
-    const i=p.indexOf('.');
-    return nacl.secretbox.open(nacl.util.decodeBase64(p.slice(i+1)),nacl.util.decodeBase64(p.slice(0,i)),SK);
-  } catch(e){return null;}
-}
-
-// ═══════════════════════════════════════
-//  PASSWORD UI
-// ═══════════════════════════════════════
+// ─── PASSWORD UI ────────────────────────────────────
 let pwVis=false;
-function togglePw() {
-  pwVis=!pwVis;
-  G('passIn').type = pwVis?'text':'password';
-  G('eyeBtn').textContent = pwVis?'🙈':'👁️';
-  G('passIn').focus();
-}
-function checkStr(pw) {
+function togglePw(){pwVis=!pwVis;G('passIn').type=pwVis?'text':'password';G('eyeBtn').textContent=pwVis?'🙈':'👁️';G('passIn').focus();}
+function checkStr(pw){
   let s=0;
-  if(pw.length>=6) s++;
-  if(pw.length>=12) s++;
-  if(/[A-Za-z]/.test(pw)&&/[0-9]/.test(pw)) s++;
-  if(/[!@#$%^&*_\-]/.test(pw)) s++;
-  const c=['','sw','sw','so','sg'];
-  const l=['','Weak','Weak','Fair — add more','Strong ✦'];
-  for(let i=1;i<=4;i++) G('s'+i).className='sm'+(i<=s?' '+c[s]:'');
+  if(pw.length>=6)s++;if(pw.length>=12)s++;
+  if(/[A-Za-z]/.test(pw)&&/[0-9]/.test(pw))s++;
+  if(/[!@#$%^&*_\-]/.test(pw))s++;
+  const c=['','sw','sw','so','sg'],l=['','Weak','Weak','Fair — add more','Strong ✦'];
+  for(let i=1;i<=4;i++)G('s'+i).className='sm'+(i<=s?' '+c[s]:'');
   G('slbl').textContent=pw.length?(l[s]||'Weak'):'';
 }
 
-// ═══════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════
+// ─── STATE ──────────────────────────────────────────
 let peer=null, conn=null, vcall=null, stream=null;
 let roomCode='', myName='';
 let camOn=false, micOn=false;
-let retryCount=0;
 
-// ═══════════════════════════════════════
-//  SETUP
-// ═══════════════════════════════════════
-async function validate() {
-  myName = G('nameIn').value.trim();
-  const pass = G('passIn').value;
-  if(!myName)       { toast('Enter your name'); return false; }
-  if(!pass.trim())  { toast('Enter a passphrase'); return false; }
-  if(pass.length<4) { toast('Passphrase too short'); return false; }
-  setInputs(true);
-  try { PH = await deriveKey(pass); }
-  catch(e) { toast('Key derivation failed'); setInputs(false); return false; }
-  setInputs(false);
+// ─── VALIDATE ───────────────────────────────────────
+async function validate(){
+  myName=G('nameIn').value.trim();
+  const pass=G('passIn').value;
+  if(!myName){toast('Enter your name');return false;}
+  if(!pass.trim()){toast('Enter a passphrase');return false;}
+  G('createBtn').disabled=true; G('joinBtn').disabled=true;
+  try{PH=await deriveKey(pass);}
+  catch(e){toast('Key derivation failed');G('createBtn').disabled=false;G('joinBtn').disabled=false;return false;}
+  G('createBtn').disabled=false; G('joinBtn').disabled=false;
   return !!PH;
 }
 
-function setInputs(d) { G('createBtn').disabled=d; G('joinBtn').disabled=d; }
+function makeCode(){const C='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return Array.from(nacl.randomBytes(6),b=>C[b%C.length]).join('');}
 
-function makeCode() {
-  const C='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  return Array.from(nacl.randomBytes(6),b=>C[b%C.length]).join('');
-}
+function showCard(id){['mainCard','createCard','joinCard'].forEach(c=>G(c).style.display=c===id?'':'none');}
+function log(el,msg){const d=G(el);if(d){d.textContent=msg;console.log('[onlyus]',msg);}}
+function logA(el,msg){const d=G(el);if(d){d.textContent+=(d.textContent?'\n':'')+msg;d.scrollTop=d.scrollHeight;console.log('[onlyus]',msg);}}
 
-async function goCreate() {
-  if(!(await validate())) return;
+async function goCreate(){
+  if(!(await validate()))return;
   showCard('createCard'); genKP();
-  roomCode=makeCode();
-  G('codeOut').textContent=roomCode;
-  initHost();
+  roomCode=makeCode(); G('codeOut').textContent=roomCode;
+  log('hDbg','Connecting to relay…'); initHost();
 }
-
-async function goJoin() {
-  if(!(await validate())) return;
+async function goJoin(){
+  if(!(await validate()))return;
   showCard('joinCard');
+  G('jDbg').style.display='none';
+  G('jDot').style.display='none';
+  G('jTxt').textContent='';
 }
-
-function goBack() {
+function goBack(){
   showCard('mainCard');
-  if(peer){peer.destroy();peer=null;}
-  conn=null; retryCount=0;
+  if(peer){try{peer.destroy();}catch(e){}}
+  peer=null; conn=null;
+}
+function copyCode(){
+  navigator.clipboard.writeText(roomCode).then(()=>toast('Code copied! ✦')).catch(()=>toast('Code: '+roomCode));
 }
 
-function copyCode() {
-  navigator.clipboard.writeText(roomCode)
-    .then(()=>toast('Code copied! ✦'))
-    .catch(()=>toast('Code: '+roomCode));
-}
-
-function showCard(id) {
-  ['mainCard','createCard','joinCard'].forEach(c=>
-    G(c).style.display=c===id?'':'none');
-}
-
-// ═══════════════════════════════════════
-//  HOST — with auto retry
-// ═══════════════════════════════════════
-function setHStep(n, state) {
-  for(let i=1;i<=3;i++) {
-    const el=G('hs'+i);
-    el.className='step'+(i<n?' done':i===n?' '+state:'');
-  }
-}
-
-function initHost() {
-  setHStep(1,'active');
-  const hid='ou6-'+roomCode.toLowerCase()+'-h';
-  if(peer){try{peer.destroy();}catch(e){} peer=null;}
-
-  peer=new Peer(hid, PEER_CONFIG);
-
-  peer.on('open', ()=>{
-    setHStep(2,'active');
+// ─── HOST ────────────────────────────────────────────
+function initHost(){
+  if(peer){try{peer.destroy();}catch(e){}}
+  // Use default PeerJS server + extra STUN
+  peer=new Peer('ou7-'+roomCode.toLowerCase()+'-h',{
+    debug:2,
+    config:{iceServers:[
+      {urls:'stun:stun.l.google.com:19302'},
+      {urls:'stun:stun1.l.google.com:19302'},
+      {urls:'stun:stun.cloudflare.com:3478'}
+    ]}
   });
-
-  peer.on('connection', c=>{
-    setHStep(3,'active');
-    conn=c; wire();
+  setHS('y','Waiting for PeerJS…');
+  peer.on('open',id=>{
+    setHS('g','Ready ✦ waiting for them to join…');
+    logA('hDbg','Connected to relay. ID: '+id);
   });
-
-  peer.on('call', answerCall);
-
-  peer.on('error', e=>{
+  peer.on('connection',c=>{
+    logA('hDbg','Incoming connection from: '+c.peer);
+    conn=c; setupConn();
+  });
+  peer.on('call',answerCall);
+  peer.on('error',e=>{
+    setHS('rd','Error: '+e.type);
+    logA('hDbg','ERROR: '+e.type+' — '+e.message);
     if(e.type==='unavailable-id'){
-      roomCode=makeCode();
-      G('codeOut').textContent=roomCode;
-      peer.destroy();
-      setTimeout(initHost,600);
-    } else if(e.type==='network'||e.type==='server-error'||e.type==='socket-error'){
-      // Retry up to 3 times
-      if(retryCount<3){
-        retryCount++;
-        setTimeout(initHost,2000);
-        setHStep(1,'active');
-        toast('Relay issue — retrying ('+retryCount+'/3)…');
-      } else {
-        setHStep(1,'err');
-        toast('Cannot reach relay — check internet');
-      }
-    } else {
-      setHStep(1,'err');
-      toast('Error: '+e.type);
+      roomCode=makeCode(); G('codeOut').textContent=roomCode;
+      logA('hDbg','ID taken — new code: '+roomCode);
+      setTimeout(initHost,800);
     }
   });
-
   peer.on('disconnected',()=>{
+    logA('hDbg','Disconnected from relay — reconnecting…');
     try{peer.reconnect();}catch(e){}
   });
 }
 
-// ═══════════════════════════════════════
-//  JOIN — with retry & better errors
-// ═══════════════════════════════════════
-function setJStep(n, state) {
-  for(let i=1;i<=3;i++){
-    const el=G('js'+i);
-    el.className='step'+(i<n?' done':i===n?' '+state:'');
-  }
-}
-
-function doJoin() {
+// ─── JOIN ────────────────────────────────────────────
+function doJoin(){
   const code=G('codeIn').value.trim().toUpperCase();
   if(code.length<4){toast('Enter the room code');return;}
-  roomCode=code; genKP(); retryCount=0;
+  roomCode=code; genKP();
+  G('jDbg').style.display='block'; G('jDot').style.display='inline-block';
+  log('jDbg','Connecting to relay…'); setJS('y','Connecting…');
+  G('joinBtn2').disabled=true;
 
-  G('joinSteps').style.display='flex';
-  G('joinConnBtn').disabled=true;
-  setJStep(1,'active');
+  if(peer){try{peer.destroy();}catch(e){}}
+  const gid='ou7-'+code.toLowerCase()+'-g'+Date.now().toString(36).slice(-5);
+  const hid='ou7-'+code.toLowerCase()+'-h';
 
-  const gid='ou6-'+code.toLowerCase()+'-g'+Date.now().toString(36).slice(-5);
-  const hid='ou6-'+code.toLowerCase()+'-h';
-
-  if(peer){try{peer.destroy();}catch(e){} peer=null;}
-  peer=new Peer(gid, PEER_CONFIG);
-
-  peer.on('open',()=>{
-    setJStep(2,'active');
-    try {
-      conn=peer.connect(hid,{reliable:true,serialization:'json'});
-      wire();
-    } catch(e){
-      toast('Connection failed');
-      G('joinConnBtn').disabled=false;
-    }
+  peer=new Peer(gid,{
+    debug:2,
+    config:{iceServers:[
+      {urls:'stun:stun.l.google.com:19302'},
+      {urls:'stun:stun1.l.google.com:19302'},
+      {urls:'stun:stun.cloudflare.com:3478'}
+    ]}
   });
 
-  peer.on('call', answerCall);
+  peer.on('open',id=>{
+    logA('jDbg','Connected to relay. My ID: '+id);
+    logA('jDbg','Connecting to host: '+hid);
+    setJS('y','Finding room…');
+    // KEY FIX: use default serialization (not json) for max compatibility
+    conn=peer.connect(hid,{reliable:true});
+    setupConn();
+  });
+
+  peer.on('call',answerCall);
 
   peer.on('error',e=>{
-    G('joinConnBtn').disabled=false;
+    G('joinBtn2').disabled=false;
+    setJS('rd','Error: '+e.type);
+    logA('jDbg','ERROR: '+e.type);
     if(e.type==='peer-unavailable'){
-      setJStep(2,'err');
-      toast('Room not found — check code and make sure they created it first');
-    } else if(e.type==='network'||e.type==='server-error'||e.type==='socket-error'){
-      if(retryCount<3){
-        retryCount++;
-        setTimeout(doJoinRetry,2000);
-        toast('Relay issue — retrying ('+retryCount+'/3)…');
-      } else {
-        setJStep(1,'err');
-        toast('Cannot reach relay — check internet connection');
-      }
+      toast('Room not found — make sure they created it first');
     } else {
-      setJStep(2,'err');
-      toast('Error: '+e.type);
+      toast('Error: '+e.type+' — check internet');
     }
   });
 }
 
-function doJoinRetry() {
-  if(peer){try{peer.destroy();}catch(e){} peer=null;}
-  doJoin();
-}
+// ─── CONNECTION SETUP (CRITICAL FIX) ────────────────
+// Both host and guest call this after conn is set.
+// We wait for conn.on('open') before doing ANYTHING.
+function setupConn(){
+  logA('hDbg','Waiting for data channel to open…');
+  logA('jDbg','Data channel created, waiting for open…');
 
-// ═══════════════════════════════════════
-//  DATA CHANNEL
-// ═══════════════════════════════════════
-function wire() {
   conn.on('open',()=>{
-    // Send public key immediately on channel open
-    conn.send({ t:'KEY', k:nacl.util.encodeBase64(KP.publicKey), n:myName });
-    setCS('y','exchanging keys…');
-    setJStep(3,'active');
+    // Data channel is OPEN — now safe to send
+    console.log('[onlyus] DATA CHANNEL OPEN');
+    logA('hDbg','Channel open! Sending public key…');
+    logA('jDbg','Channel open! Sending public key…');
+    setJS('y','Exchanging keys…');
+
+    // Send my public key as a plain string to avoid serialization issues
+    const payload = JSON.stringify({
+      t:'KEY',
+      k:b64(KP.publicKey),
+      n:myName
+    });
+    conn.send(payload);
   });
 
-  conn.on('data', d=>{
+  conn.on('data', raw=>{
+    // Parse — handle both string and object (different PeerJS serialization modes)
+    let d;
+    try{ d = typeof raw==='string' ? JSON.parse(raw) : raw; }
+    catch(e){ console.error('parse error',e); return; }
+
     if(!d||!d.t) return;
+    console.log('[onlyus] data received, type:', d.t);
 
     if(d.t==='KEY'){
       try{
-        SK=buildSK(d.k, PH);
+        SK=buildSK(d.k,PH);
+        logA('hDbg','Keys exchanged ✦ launching chat');
+        logA('jDbg','Keys exchanged ✦ launching chat');
         launchChat();
         setCS('g','encrypted · connected');
         addSys('Connected ✦ E2E encrypted');
-      } catch(e){
-        toast('Key exchange failed — make sure passphrase is identical on both sides');
-        setCS('rd','key error');
+      }catch(e){
+        console.error('key exchange error',e);
+        toast('Key error — make sure passphrase matches on both sides');
       }
       return;
     }
-
     if(!SK) return;
-
-    if(d.t==='MSG'){
-      const p=dec(d.d);
-      if(p!==null) addMsg(p,'them');
-      return;
-    }
-
-    if(d.t==='IMG'){
-      const b=decB(d.d);
-      if(b) addImg(URL.createObjectURL(new Blob([b],{type:d.m||'image/jpeg'})),'them');
-    }
+    if(d.t==='MSG'){const p=dec(d.d);if(p!==null)addMsg(p,'them');return;}
+    if(d.t==='IMG'){const b=decB(d.d);if(b)addImg(URL.createObjectURL(new Blob([b],{type:d.m||'image/jpeg'})),'them');}
   });
 
-  conn.on('close',()=>{
-    setCS('rd','disconnected');
-    addSys('Session ended');
-  });
-
-  conn.on('error',e=>{
-    setCS('rd','error');
-    toast('Connection error: '+e.type);
-  });
+  conn.on('close',()=>{setCS('rd','disconnected');addSys('Session ended');});
+  conn.on('error',e=>{console.error('conn error',e);setCS('rd','error: '+e.type);});
 }
 
-// ═══════════════════════════════════════
-//  SEND
-// ═══════════════════════════════════════
-function sendMsg() {
-  const el=G('mi'), txt=el.value.trim();
-  if(!txt) return;
-  if(!rdy()){toast('Not connected — wait for green dot');return;}
-  conn.send({t:'MSG',d:enc(txt)});
-  addMsg(txt,'me');
-  el.value=''; el.style.height='auto';
-}
-
-function sendImg(e) {
-  const f=e.target.files[0]; if(!f) return;
+// ─── SEND ────────────────────────────────────────────
+function sendMsg(){
+  const el=G('mi'),txt=el.value.trim();
+  if(!txt)return;
   if(!rdy()){toast('Not connected yet');return;}
+  conn.send(JSON.stringify({t:'MSG',d:enc(txt)}));
+  addMsg(txt,'me'); el.value=''; el.style.height='auto';
+}
+function sendImg(e){
+  const f=e.target.files[0]; if(!f)return;
+  if(!rdy()){toast('Not connected');return;}
   if(f.size>8*1024*1024){toast('Max 8MB');return;}
   const r=new FileReader();
   r.onload=ev=>{
     const bytes=new Uint8Array(ev.target.result);
-    conn.send({t:'IMG',d:encB(bytes),m:f.type});
+    conn.send(JSON.stringify({t:'IMG',d:encB(bytes),m:f.type}));
     addImg(URL.createObjectURL(f),'me');
     toast('Photo sent ✦');
   };
   r.readAsArrayBuffer(f); e.target.value='';
 }
-
 function rdy(){return !!(conn&&conn.open&&SK);}
 
-// ═══════════════════════════════════════
-//  VIDEO
-// ═══════════════════════════════════════
+// ─── VIDEO ───────────────────────────────────────────
 async function toggleCam(){
   if(!camOn){
     try{
@@ -716,13 +549,9 @@ async function toggleCam(){
       G('locV').srcObject=stream; camOn=true; micOn=true;
       G('vwrap').classList.add('on'); G('voff').style.display='none';
       G('camBtn').classList.add('on'); G('micBtn').classList.add('on');
-      if(conn&&conn.open){
-        vcall=peer.call(conn.peer,stream);
-        vcall.on('stream',s=>setRemote(s));
-        vcall.on('error',()=>{});
-      }
-      toast('Video on · DTLS-SRTP encrypted');
-    }catch(e){toast('Camera denied — check permissions');}
+      if(conn&&conn.open){vcall=peer.call(conn.peer,stream);vcall.on('stream',s=>setRemote(s));}
+      toast('Video on · encrypted');
+    }catch(e){toast('Camera denied');}
   } else {
     camOn=!camOn;
     stream&&stream.getVideoTracks().forEach(t=>t.enabled=camOn);
@@ -730,37 +559,24 @@ async function toggleCam(){
     toast(camOn?'Camera on':'Camera off');
   }
 }
-
 function answerCall(c){
-  const ans=s=>{vcall=c;c.answer(s);c.on('stream',r=>setRemote(r));c.on('error',()=>{});};
+  const ans=s=>{vcall=c;c.answer(s);c.on('stream',r=>setRemote(r));};
   if(stream){ans(stream);return;}
-  navigator.mediaDevices.getUserMedia({video:true,audio:true})
-    .then(s=>{
-      stream=s; G('locV').srcObject=s; camOn=true; micOn=true;
-      G('vwrap').classList.add('on'); G('voff').style.display='none';
-      G('camBtn').classList.add('on'); G('micBtn').classList.add('on');
-      ans(s);
-    }).catch(()=>c.answer());
+  navigator.mediaDevices.getUserMedia({video:true,audio:true}).then(s=>{
+    stream=s;G('locV').srcObject=s;camOn=true;micOn=true;
+    G('vwrap').classList.add('on');G('voff').style.display='none';
+    G('camBtn').classList.add('on');G('micBtn').classList.add('on');ans(s);
+  }).catch(()=>c.answer());
 }
-
-function setRemote(s){
-  G('remV').srcObject=s; G('vwrap').classList.add('on'); G('voff').style.display='none';
-}
-
+function setRemote(s){G('remV').srcObject=s;G('vwrap').classList.add('on');G('voff').style.display='none';}
 function toggleMic(){
   if(!stream){toast('Start camera first');return;}
-  micOn=!micOn;
-  stream.getAudioTracks().forEach(t=>t.enabled=micOn);
-  G('micBtn').classList.toggle('on',micOn);
-  toast(micOn?'Mic on':'Mic muted 🔇');
+  micOn=!micOn; stream.getAudioTracks().forEach(t=>t.enabled=micOn);
+  G('micBtn').classList.toggle('on',micOn); toast(micOn?'Mic on':'Mic muted');
 }
 
-// ═══════════════════════════════════════
-//  CHAT UI
-// ═══════════════════════════════════════
-function launchChat(){
-  G('setup').style.display='none'; G('chat').classList.add('on'); scrollB();
-}
+// ─── CHAT UI ─────────────────────────────────────────
+function launchChat(){G('setup').style.display='none';G('chat').classList.add('on');scrollB();}
 function addMsg(txt,who){
   const w=document.createElement('div'); w.className='mw '+who;
   w.innerHTML=`<div class="bub">${esc(txt)}</div><div class="mt">${now()}</div><div class="et">⬡ encrypted</div>`;
@@ -769,59 +585,39 @@ function addMsg(txt,who){
 function addImg(url,who){
   const w=document.createElement('div'); w.className='mw '+who;
   const b=document.createElement('div'); b.className='bub'; b.style.padding='.28rem';
-  const img=document.createElement('img');
-  img.src=url; img.loading='lazy'; img.onclick=()=>openLB(url);
+  const img=document.createElement('img'); img.src=url; img.loading='lazy'; img.onclick=()=>openLB(url);
   b.appendChild(img); w.appendChild(b);
   w.innerHTML+=`<div class="mt">${now()}</div><div class="et">⬡ photo encrypted</div>`;
   G('msgs').appendChild(w); scrollB();
 }
-function addSys(txt){
-  const d=document.createElement('div'); d.className='sys'; d.textContent=txt;
-  G('msgs').appendChild(d); scrollB();
-}
+function addSys(txt){const d=document.createElement('div');d.className='sys';d.textContent=txt;G('msgs').appendChild(d);scrollB();}
 function scrollB(){const m=G('msgs');setTimeout(()=>m.scrollTop=m.scrollHeight,50);}
 function now(){return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
 function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
 function G(id){return document.getElementById(id);}
 function setCS(c,t){G('cDot').className='dot '+(c==='g'?'g':c==='rd'?'rd':'y');G('cTxt').textContent=t;}
+function setHS(c,t){G('hDot').className='dot '+(c==='g'?'g':c==='rd'?'rd':'y');G('hTxt').textContent=t;}
+function setJS(c,t){G('jDot').className='dot '+(c==='g'?'g':c==='rd'?'rd':'y');G('jTxt').textContent=t;}
 function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
 function rsz(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,96)+'px';}
 function openLB(url){G('lbi').src=url;G('lb').classList.add('on');}
 function closeLB(){G('lb').classList.remove('on');}
-
 function endSess(){
-  if(!confirm('End session?')) return;
-  if(vcall) vcall.close();
-  if(conn)  conn.close();
-  if(peer)  peer.destroy();
-  if(stream) stream.getTracks().forEach(t=>t.stop());
-  SK=null;PH=null;KP=null;
-  location.reload();
+  if(!confirm('End session?'))return;
+  if(vcall)vcall.close(); if(conn)conn.close(); if(peer)peer.destroy();
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  SK=null;PH=null;KP=null; location.reload();
 }
-
 let _tt;
-function toast(msg){
-  const t=G('toast'); t.textContent=msg; t.classList.add('on');
-  clearTimeout(_tt); _tt=setTimeout(()=>t.classList.remove('on'),3000);
-}
+function toast(msg){const t=G('toast');t.textContent=msg;t.classList.add('on');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('on'),3000);}
 
-// Android: no double-tap zoom
+// Android no zoom
 let lt=0;
-document.addEventListener('touchend',e=>{
-  const n=Date.now(); if(n-lt<280)e.preventDefault(); lt=n;
-},{passive:false});
-
+document.addEventListener('touchend',e=>{const n=Date.now();if(n-lt<280)e.preventDefault();lt=n;},{passive:false});
 history.pushState({},'');
 window.addEventListener('popstate',()=>{
   if(G('lb').classList.contains('on')){closeLB();return;}
   if(G('infoM').classList.contains('on')){G('infoM').classList.remove('on');}
-});
-
-async function keepAwake(){
-  try{if('wakeLock' in navigator) await navigator.wakeLock.request('screen');}catch(e){}
-}
-document.addEventListener('visibilitychange',()=>{
-  if(document.visibilityState==='visible'&&camOn) keepAwake();
 });
 </script>
 </body>
