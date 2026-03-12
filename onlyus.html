@@ -555,10 +555,17 @@ body.blurred #app { filter: blur(24px); transition: filter .1s; }
 'use strict';
 
 // ══════════════════════════════════════
-//  ⚡ PASTE YOUR CLOUDFLARE WORKER URL
-//  e.g. https://onlyus.yourname.workers.dev
+//  CLOUDFLARE SIGNAL ENDPOINT
+//  Default: same-origin Pages Function (/api/signal)
+//  Override: ?cf=https://your-worker.workers.dev
 // ══════════════════════════════════════
-const CF_URL = 'PASTE_YOUR_WORKER_URL_HERE';
+const CF_URL = (() => {
+  const q = new URLSearchParams(location.search).get('cf');
+  if (q) return q;
+  const saved = localStorage.getItem('onlyus_cf_url');
+  if (saved) return saved;
+  return `${location.origin}/api/signal`;
+})();
 
 // ══════════════════════════════════════
 //  WEBRTC ICE CONFIG
@@ -585,20 +592,28 @@ const RTC_CFG = {
 // ══════════════════════════════════════
 async function cfWrite(room, action, data) {
   try {
-    await fetch(`${CF_URL}?a=${action}&r=${room}`, {
+    const res = await fetch(`${CF_URL}?a=${action}&r=${room}`, {
       method: 'POST',
       body: JSON.stringify(data),
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch(e) { console.warn('cfWrite fail', e); }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  } catch(e) {
+    console.warn('cfWrite fail', e);
+    toast('Signal server unreachable. Check Cloudflare setup.');
+  }
 }
 
 async function cfRead(room, action) {
   try {
     const r = await fetch(`${CF_URL}?a=${action}&r=${room}`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const j = await r.json();
     return j.data ? JSON.parse(j.data) : null;
-  } catch { return null; }
+  } catch (e) {
+    console.warn('cfRead fail', e);
+    return null;
+  }
 }
 
 async function cfPoll(room, action, timeoutMs=30000, intervalMs=1200) {
@@ -727,8 +742,8 @@ async function validate() {
   if (!myName)       { toast('Enter your name'); return false; }
   if (!pw.trim())    { toast('Enter a passphrase'); return false; }
   if (pw.length < 4) { toast('Passphrase too short'); return false; }
-  if (CF_URL === 'PASTE_YOUR_WORKER_URL_HERE') {
-    toast('⚠️ Add your Cloudflare Worker URL first'); return false;
+  if (!/^https?:\/\//.test(CF_URL) && !CF_URL.startsWith('/')) {
+    toast('Invalid signaling endpoint URL'); return false;
   }
   lockBtns(true);
   try { PH = await deriveKey(pw); }
