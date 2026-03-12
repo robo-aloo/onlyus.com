@@ -3,621 +3,1255 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#0a0a12">
+<meta name="theme-color" content="#09090f">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>Only Us</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tweetnacl/1.0.3/nacl-fast.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tweetnacl-util/0.15.1/nacl-util.min.js"></script>
-<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap');
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-:root{
-  --bg:#0a0a12;--card:#13131e;--inp:#1c1c2a;--bor:#ffffff12;
-  --a:#8b7cf8;--txt:#e8e6f0;--sub:#7c7a8e;
-  --safe:#4ade80;--warn:#fbbf24;--danger:#f87171;
-  --me:#3d2880;--them:#1c1c2a;--r:13px;
-}
-html,body{height:100%;background:var(--bg);color:var(--txt);
-  font-family:'Inter',system-ui,sans-serif;overflow:hidden;}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
-#setup{height:100%;display:flex;align-items:center;justify-content:center;
-  padding:1rem;overflow-y:auto;}
-.si{width:100%;max-width:340px;display:flex;flex-direction:column;gap:.9rem;}
-.logo{text-align:center;}
-.logo h1{font-size:2rem;font-weight:300;}
-.logo h1 b{color:var(--a);font-weight:400;}
-.logo p{font-size:.6rem;color:var(--sub);letter-spacing:.15em;text-transform:uppercase;margin-top:.2rem;}
-.sbadge{display:inline-flex;align-items:center;gap:.3rem;margin-top:.4rem;font-size:.56rem;
-  color:var(--safe);letter-spacing:.1em;text-transform:uppercase;
-  background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.18);
-  padding:.26rem .7rem;border-radius:20px;}
-.card{background:var(--card);border:1px solid var(--bor);border-radius:var(--r);
-  padding:1.2rem;display:flex;flex-direction:column;gap:.8rem;}
-.ct{font-size:.63rem;font-weight:500;color:var(--a);letter-spacing:.1em;text-transform:uppercase;}
-.f label{display:block;font-size:.58rem;color:var(--sub);letter-spacing:.1em;
-  text-transform:uppercase;margin-bottom:.24rem;}
-.f input{width:100%;background:var(--inp);border:1px solid var(--bor);color:var(--txt);
-  font-family:inherit;font-size:.88rem;padding:.62rem .82rem;border-radius:9px;
-  outline:none;transition:border-color .2s;-webkit-appearance:none;}
-.f input:focus{border-color:var(--a);}
-.pw-wrap{position:relative;display:flex;align-items:center;}
-.pw-wrap input{padding-right:2.6rem;}
-.eye{position:absolute;right:.65rem;background:none;border:none;color:var(--sub);
-  cursor:pointer;font-size:.95rem;padding:.2rem;line-height:1;transition:color .2s;}
-.eye:hover{color:var(--a);}
-.smeter{display:flex;gap:.18rem;margin-top:.26rem;}
-.sm{flex:1;height:3px;border-radius:3px;background:var(--inp);transition:background .25s;}
-.sw{background:var(--danger);}.so{background:var(--warn);}.sg{background:var(--safe);}
-.slbl{font-size:.55rem;color:var(--sub);margin-top:.15rem;}
-.kpw{display:none;flex-direction:column;gap:.26rem;}
-.kpw.on{display:flex;}
-.kpl{display:flex;justify-content:space-between;font-size:.58rem;color:var(--sub);}
-.kpl b{color:var(--a);}
-.kpb-bg{width:100%;height:3px;background:var(--inp);border-radius:3px;overflow:hidden;}
-.kpb{height:100%;width:0%;border-radius:3px;background:linear-gradient(90deg,var(--a),#f472b6);transition:width .1s;}
-.btn{width:100%;padding:.7rem;border:none;border-radius:9px;font-family:inherit;
-  font-size:.88rem;font-weight:500;cursor:pointer;transition:opacity .15s,transform .1s;}
-.btn:active{transform:scale(.97);}
-.bp{background:var(--a);color:#fff;}.bp:hover{opacity:.88;}
-.bp:disabled{opacity:.32;cursor:not-allowed;transform:none;}
-.bs{background:var(--inp);color:var(--txt);border:1px solid var(--bor);}
-.bs:hover{border-color:var(--a);color:var(--a);}
-.r2{display:flex;gap:.5rem;}.r2 .btn{flex:1;}
-.or{display:flex;align-items:center;gap:.6rem;font-size:.58rem;color:var(--sub);}
-.or::before,.or::after{content:'';flex:1;height:1px;background:var(--bor);}
-.cdisp{background:var(--inp);border:1px solid var(--bor);border-radius:9px;
-  padding:.9rem;text-align:center;}
-.cbig{font-size:1.9rem;font-weight:300;letter-spacing:.35em;color:var(--a);font-family:monospace;}
-.csub{font-size:.58rem;color:var(--sub);margin-top:.26rem;}
-.sl{display:flex;align-items:center;gap:.4rem;font-size:.63rem;color:var(--sub);}
-.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;animation:bk 2s infinite;}
-.g{background:var(--safe);box-shadow:0 0 6px var(--safe);}
-.y{background:var(--warn);box-shadow:0 0 6px var(--warn);}
-.rd{background:var(--danger);box-shadow:0 0 6px var(--danger);}
-@keyframes bk{0%,100%{opacity:1}50%{opacity:.15}}
-.dbg{font-size:.6rem;color:var(--sub);background:rgba(0,0,0,.3);border-radius:7px;
-  padding:.4rem .6rem;line-height:1.6;font-family:monospace;max-height:80px;overflow-y:auto;}
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%; background: #09090f; color: #ededf5;
+  font-family: 'Inter', system-ui, sans-serif;
+  overflow: hidden; -webkit-font-smoothing: antialiased;
+  /* NO user-select block on body — causes button issues */
+}
+/* Only block selection in chat messages */
+.bub { -webkit-user-select: text; user-select: text; }
 
-/* CHAT */
-#chat{display:none;height:100%;}
-#chat.on{display:flex;flex-direction:column;}
-@media(orientation:landscape) and (min-width:580px){
-  #chat.on{flex-direction:row;}
-  #vcol{width:40%;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid var(--bor);}
-  #mcol{flex:1;display:flex;flex-direction:column;min-width:0;}
-  #vwrap.on{flex:1;}
+/* Anti screenshot blur */
+body.blurred #app { filter: blur(24px); transition: filter .1s; }
+
+:root {
+  --bg: #09090f; --card: #111118; --inp: #191924;
+  --bor: rgba(255,255,255,.08); --bora: rgba(139,124,248,.35);
+  --a: #8b7cf8; --a2: #f472b6;
+  --txt: #ededf5; --sub: #626070;
+  --ok: #4ade80; --warn: #fbbf24; --err: #f87171;
+  --me: #281c65; --them: #141420;
+  --rad: 13px; --rad2: 10px;
 }
-@media not ((orientation:landscape) and (min-width:580px)){
-  #vcol{flex-shrink:0;}
-  #mcol{flex:1;display:flex;flex-direction:column;min-width:0;}
+
+#app { height: 100%; }
+
+/* ════════ VIEWS ════════ */
+.view { display: none; }
+.view.on { display: flex; flex-direction: column; }
+
+/* ════════ SETUP ════════ */
+#vSetup {
+  height: 100vh; align-items: center; justify-content: center;
+  padding: 1.2rem; overflow-y: auto; -webkit-overflow-scrolling: touch;
 }
-#topbar{display:flex;align-items:center;justify-content:space-between;
-  padding:.58rem .85rem;padding-top:calc(.58rem + env(safe-area-inset-top));
-  background:var(--bg);border-bottom:1px solid var(--bor);flex-shrink:0;}
-.tl .tn{font-size:.9rem;font-weight:500;}
-.tl .ts{display:flex;align-items:center;gap:.28rem;font-size:.58rem;color:var(--sub);margin-top:.06rem;}
-.tr{display:flex;gap:.3rem;}
-.ic{width:32px;height:32px;border-radius:50%;background:var(--inp);border:1px solid var(--bor);
-  color:var(--txt);cursor:pointer;display:flex;align-items:center;justify-content:center;
-  font-size:.78rem;transition:all .18s;flex-shrink:0;}
-.ic:hover,.ic.on{background:rgba(139,124,248,.18);border-color:var(--a);color:var(--a);}
-.ic.red{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.25);color:var(--danger);}
-#vwrap{position:relative;background:#000;display:none;overflow:hidden;}
-#vwrap.on{display:block;}
-@media(orientation:portrait){#vwrap.on{height:36vmin;max-height:200px;}}
-#remV{width:100%;height:100%;object-fit:cover;display:block;}
-#locV{position:absolute;bottom:.45rem;right:.45rem;width:64px;height:88px;
-  object-fit:cover;border-radius:7px;border:1.5px solid rgba(139,124,248,.45);}
-.voff{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  flex-direction:column;gap:.3rem;color:var(--sub);font-size:.6rem;}
-.voff i{font-size:1.5rem;opacity:.13;font-style:normal;}
-#msgs{flex:1;overflow-y:auto;padding:.68rem;display:flex;flex-direction:column;gap:.42rem;
-  scroll-behavior:smooth;-webkit-overflow-scrolling:touch;}
-#msgs::-webkit-scrollbar{width:2px;}
-#msgs::-webkit-scrollbar-thumb{background:var(--bor);}
-.mw{display:flex;flex-direction:column;max-width:78%;}
-.mw.me{align-self:flex-end;align-items:flex-end;}
-.mw.them{align-self:flex-start;align-items:flex-start;}
-.bub{padding:.5rem .76rem;font-size:.83rem;line-height:1.5;word-break:break-word;border-radius:11px;}
-.mw.me .bub{background:var(--me);border-bottom-right-radius:3px;}
-.mw.them .bub{background:var(--them);border:1px solid var(--bor);border-bottom-left-radius:3px;}
-.bub img{max-width:170px;max-height:190px;border-radius:7px;display:block;cursor:pointer;}
-.mt{font-size:.5rem;color:var(--sub);margin-top:.1rem;}
-.et{font-size:.47rem;color:var(--safe);opacity:.45;}
-.sys{align-self:center;font-size:.56rem;color:var(--sub);padding:.2rem .62rem;
-  background:var(--inp);border-radius:20px;border:1px solid var(--bor);text-align:center;}
-.ibar{padding:.52rem .68rem;padding-bottom:calc(.52rem + env(safe-area-inset-bottom));
-  background:var(--bg);border-top:1px solid var(--bor);flex-shrink:0;}
-.ir{display:flex;gap:.36rem;align-items:flex-end;}
-#mi{flex:1;min-height:36px;max-height:96px;padding:.5rem .76rem;background:var(--inp);
-  border:1px solid var(--bor);color:var(--txt);font-family:inherit;font-size:.85rem;
-  border-radius:18px;outline:none;resize:none;line-height:1.42;transition:border-color .2s;}
-#mi:focus{border-color:var(--a);}
-.snd{width:35px;height:35px;flex-shrink:0;border-radius:50%;background:var(--a);border:none;
-  color:#fff;font-size:.85rem;cursor:pointer;display:flex;align-items:center;
-  justify-content:center;transition:transform .1s;}
-.snd:active{transform:scale(.88);}
-.att{width:33px;height:33px;flex-shrink:0;border-radius:50%;background:var(--inp);
-  border:1px solid var(--bor);color:var(--sub);font-size:.8rem;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;transition:all .18s;}
-.att:active{border-color:var(--a);color:var(--a);}
-#fi{display:none;}
-#toast{position:fixed;bottom:4.5rem;left:50%;transform:translateX(-50%) translateY(4px);
-  background:var(--card);border:1px solid var(--bor);padding:.38rem .9rem;border-radius:18px;
-  font-size:.65rem;opacity:0;transition:all .22s;pointer-events:none;
-  z-index:99;max-width:88vw;text-align:center;}
-#toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
-.mbg{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);
-  z-index:50;display:flex;align-items:center;justify-content:center;padding:1rem;
-  opacity:0;pointer-events:none;transition:opacity .22s;}
-.mbg.on{opacity:1;pointer-events:all;}
-.modal{background:var(--card);border:1px solid var(--bor);border-radius:var(--r);
-  padding:1.3rem;width:min(350px,100%);display:flex;flex-direction:column;gap:.85rem;
-  max-height:85vh;overflow-y:auto;}
-.modal h3{font-size:.95rem;font-weight:500;color:var(--a);}
-.minfo{font-size:.71rem;line-height:1.85;color:var(--sub);}
-.minfo b{color:var(--txt);}
-.chip{display:inline-block;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);
-  color:var(--safe);padding:.1rem .42rem;border-radius:5px;font-size:.56rem;margin:.08rem;}
-#lb{position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:100;
-  display:none;align-items:center;justify-content:center;cursor:pointer;}
-#lb.on{display:flex;}
-#lbi{max-width:95vw;max-height:88vh;border-radius:8px;object-fit:contain;}
+.si { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 1rem; }
+
+/* BRAND */
+.brand { text-align: center; }
+.brand h1 { font-size: 2.4rem; font-weight: 300; letter-spacing: -.03em; }
+.brand h1 b { color: var(--a); font-weight: 500; }
+.brand-p { font-size: .58rem; color: var(--sub); letter-spacing: .18em; text-transform: uppercase; margin-top: .3rem; }
+.badge {
+  display: inline-flex; align-items: center; gap: .3rem; margin-top: .4rem;
+  font-size: .53rem; letter-spacing: .08em; text-transform: uppercase;
+  padding: .25rem .7rem; border-radius: 20px;
+}
+.badge-g { color: var(--ok); background: rgba(74,222,128,.05); border: 1px solid rgba(74,222,128,.13); }
+.badge-a { color: var(--a); background: rgba(139,124,248,.05); border: 1px solid rgba(139,124,248,.15); margin-top: .28rem; }
+
+/* CARD */
+.card {
+  background: var(--card); border: 1px solid var(--bor);
+  border-radius: var(--rad); padding: 1.3rem;
+  display: flex; flex-direction: column; gap: .9rem;
+}
+.card-t { font-size: .59rem; font-weight: 600; color: var(--a); letter-spacing: .13em; text-transform: uppercase; }
+
+/* FIELD */
+.field { display: flex; flex-direction: column; gap: .28rem; }
+.field label { font-size: .57rem; color: var(--sub); letter-spacing: .1em; text-transform: uppercase; }
+
+/* INPUT — clean, no weirdness */
+.inp {
+  display: block; width: 100%;
+  background: var(--inp); border: 1.5px solid var(--bor); color: var(--txt);
+  font-family: inherit; font-size: .9rem;
+  padding: .68rem .9rem; border-radius: var(--rad2);
+  outline: none; -webkit-appearance: none; appearance: none;
+  transition: border-color .2s;
+}
+.inp:focus { border-color: var(--a); }
+.inp::placeholder { color: var(--sub); }
+
+/* PASSWORD ROW — flex row so button is truly beside input */
+.pw-row { display: flex; align-items: center; gap: .5rem; }
+.pw-row .inp { flex: 1; }
+/* Eye button — big touch target, clearly tappable */
+.eye-btn {
+  flex-shrink: 0;
+  width: 44px; height: 44px;
+  background: var(--inp); border: 1.5px solid var(--bor);
+  border-radius: var(--rad2); color: var(--sub);
+  font-size: 1.1rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+  /* Critical: ensure it receives taps */
+  position: relative; z-index: 1;
+  -webkit-tap-highlight-color: rgba(139,124,248,.2);
+}
+.eye-btn:hover, .eye-btn:active { background: rgba(139,124,248,.15); border-color: var(--a); color: var(--a); }
+
+/* STRENGTH BARS */
+.str-row { display: flex; gap: .2rem; }
+.str-seg { flex: 1; height: 3px; border-radius: 3px; background: var(--inp); transition: background .25s; }
+.s-r { background: var(--err); }
+.s-o { background: var(--warn); }
+.s-g { background: var(--ok); }
+.str-lbl { font-size: .54rem; color: var(--sub); min-height: .9rem; }
+
+/* KDF PROGRESS */
+.kdf-wrap { display: none; flex-direction: column; gap: .26rem; }
+.kdf-wrap.on { display: flex; }
+.kdf-top { display: flex; justify-content: space-between; font-size: .57rem; color: var(--sub); }
+.kdf-top b { color: var(--a); }
+.kdf-track { height: 3px; background: var(--inp); border-radius: 3px; overflow: hidden; }
+.kdf-bar { height: 100%; width: 0%; border-radius: 3px; background: linear-gradient(90deg, var(--a), var(--a2)); transition: width .1s; }
+
+/* BUTTONS */
+.btn {
+  display: block; width: 100%; padding: .76rem;
+  border: none; border-radius: var(--rad2);
+  font-family: inherit; font-size: .9rem; font-weight: 500;
+  cursor: pointer; outline: none;
+  transition: opacity .15s, transform .1s;
+  position: relative; z-index: 1;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(.97); }
+.btn:disabled { opacity: .3; cursor: not-allowed; transform: none !important; }
+.btn-p { background: linear-gradient(135deg, var(--a), #7460f0); color: #fff; }
+.btn-p:hover:not(:disabled) { opacity: .88; }
+.btn-s { background: var(--inp); color: var(--txt); border: 1.5px solid var(--bor); }
+.btn-s:hover:not(:disabled) { border-color: var(--a); color: var(--a); }
+.btn-row { display: flex; gap: .6rem; }
+.btn-row .btn { flex: 1; }
+
+/* DIVIDER */
+.divider { display: flex; align-items: center; gap: .6rem; font-size: .57rem; color: var(--sub); }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--bor); }
+
+/* CODE BOX */
+.code-box { background: var(--inp); border: 1.5px solid var(--bora); border-radius: var(--rad2); padding: 1.1rem; text-align: center; }
+.code-num { font-size: 2.1rem; font-weight: 300; letter-spacing: .42em; color: var(--a); font-family: 'Courier New', monospace; }
+.code-hint { font-size: .57rem; color: var(--sub); margin-top: .3rem; }
+
+/* STEPS */
+.steps { display: flex; flex-direction: column; gap: .36rem; }
+.step { display: flex; align-items: center; gap: .55rem; padding: .46rem .7rem; border-radius: 8px; font-size: .66rem; color: var(--sub); background: var(--inp); border: 1px solid var(--bor); transition: all .25s; }
+.step .si { font-size: .82rem; flex-shrink: 0; }
+.step.sa { color: var(--txt); border-color: var(--a); background: rgba(139,124,248,.06); }
+.step.sd { color: var(--ok); border-color: rgba(74,222,128,.18); background: rgba(74,222,128,.04); }
+.step.se { color: var(--err); border-color: rgba(248,113,113,.18); background: rgba(248,113,113,.04); }
+
+/* ════════ CHAT ════════ */
+#vChat { height: 100vh; }
+@media (orientation: landscape) and (min-width: 600px) {
+  #vChat.on { flex-direction: row; }
+  #vidCol { width: 42%; flex-shrink: 0; display: flex; flex-direction: column; border-right: 1px solid var(--bor); }
+  #msgCol { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  #vidWrap.on { flex: 1; }
+}
+@media not ((orientation: landscape) and (min-width: 600px)) {
+  #vidCol { flex-shrink: 0; }
+  #msgCol { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+}
+
+/* TOPBAR */
+#topBar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .65rem 1rem;
+  padding-top: calc(.65rem + env(safe-area-inset-top));
+  background: var(--card); border-bottom: 1px solid var(--bor);
+  flex-shrink: 0; gap: .5rem;
+}
+.top-l { flex: 1; min-width: 0; }
+.top-name { font-size: .92rem; font-weight: 600; }
+.top-stat { display: flex; align-items: center; gap: .3rem; font-size: .59rem; color: var(--sub); margin-top: .05rem; }
+.top-r { display: flex; gap: .35rem; align-items: center; flex-shrink: 0; }
+
+/* ICON BUTTONS — all given explicit tap area and z-index */
+.ic-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--inp); border: 1.5px solid var(--bor);
+  color: var(--sub); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .85rem; flex-shrink: 0; outline: none;
+  transition: all .2s;
+  position: relative; z-index: 1;
+  -webkit-tap-highlight-color: rgba(139,124,248,.15);
+}
+.ic-btn:hover, .ic-btn.on { background: rgba(139,124,248,.15); border-color: var(--a); color: var(--a); }
+.ic-btn.danger { background: rgba(248,113,113,.07); border-color: rgba(248,113,113,.18); color: var(--err); }
+.ic-btn.danger:hover { background: rgba(248,113,113,.18); }
+.ic-btn.warn-c { background: rgba(251,191,36,.07); border-color: rgba(251,191,36,.2); color: var(--warn); }
+
+/* STATUS DOT */
+.sdot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.sdot.g { background: var(--ok); box-shadow: 0 0 7px var(--ok); animation: dp 2s infinite; }
+.sdot.y { background: var(--warn); box-shadow: 0 0 7px var(--warn); animation: dp 2s infinite; }
+.sdot.r { background: var(--err); box-shadow: 0 0 6px var(--err); }
+@keyframes dp { 0%,100%{opacity:1} 50%{opacity:.18} }
+
+/* RECONNECT BELL */
+#bellWrap { position: relative; display: none; }
+#bellWrap.on { display: block; }
+.bell-ring {
+  position: absolute; inset: -5px; border-radius: 50%;
+  border: 2px solid var(--warn); pointer-events: none;
+  animation: ringp 1.6s infinite;
+}
+@keyframes ringp { 0%{opacity:.9;transform:scale(1)} 100%{opacity:0;transform:scale(1.75)} }
+
+/* VIDEO */
+#vidWrap { position: relative; background: #000; display: none; overflow: hidden; }
+#vidWrap.on { display: block; }
+@media (orientation: portrait) { #vidWrap.on { height: clamp(140px, 35vmin, 210px); } }
+#remVid { width: 100%; height: 100%; object-fit: cover; display: block; }
+#locVid { position: absolute; bottom: .55rem; right: .55rem; width: 70px; height: 96px; object-fit: cover; border-radius: 8px; border: 2px solid rgba(139,124,248,.5); box-shadow: 0 2px 14px rgba(0,0,0,.5); }
+.vid-off-bg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: .38rem; color: var(--sub); font-size: .6rem; }
+.vid-off-icon { font-size: 1.9rem; opacity: .1; }
+
+/* MESSAGES */
+#msgList {
+  flex: 1; overflow-y: auto; padding: .8rem;
+  display: flex; flex-direction: column; gap: .5rem;
+  scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
+}
+#msgList::-webkit-scrollbar { width: 2px; }
+#msgList::-webkit-scrollbar-thumb { background: var(--bor); border-radius: 2px; }
+.mw { display: flex; flex-direction: column; max-width: 80%; }
+.mw.me { align-self: flex-end; align-items: flex-end; }
+.mw.them { align-self: flex-start; align-items: flex-start; }
+.bub { padding: .55rem .84rem; font-size: .85rem; line-height: 1.52; word-break: break-word; border-radius: 14px; }
+.mw.me .bub { background: var(--me); border-bottom-right-radius: 3px; }
+.mw.them .bub { background: var(--them); border: 1px solid var(--bor); border-bottom-left-radius: 3px; }
+.bub img { max-width: 180px; max-height: 200px; border-radius: 8px; display: block; cursor: pointer; }
+.msg-time { font-size: .49rem; color: var(--sub); margin-top: .1rem; }
+.msg-enc { font-size: .44rem; color: var(--ok); opacity: .4; }
+.sys-msg { align-self: center; font-size: .56rem; color: var(--sub); padding: .22rem .7rem; background: var(--inp); border-radius: 20px; border: 1px solid var(--bor); text-align: center; max-width: 92%; }
+
+/* INPUT BAR */
+#inputBar {
+  padding: .6rem .8rem;
+  padding-bottom: calc(.6rem + env(safe-area-inset-bottom));
+  background: var(--card); border-top: 1px solid var(--bor); flex-shrink: 0;
+}
+.input-row { display: flex; gap: .4rem; align-items: flex-end; }
+#msgIn {
+  flex: 1; min-height: 38px; max-height: 100px;
+  padding: .55rem .85rem;
+  background: var(--inp); border: 1.5px solid var(--bor);
+  color: var(--txt); font-family: inherit; font-size: .88rem;
+  border-radius: 20px; outline: none; resize: none;
+  line-height: 1.42; transition: border-color .2s;
+  -webkit-appearance: none;
+}
+#msgIn:focus { border-color: var(--a); }
+#msgIn::placeholder { color: var(--sub); }
+.send-btn {
+  width: 38px; height: 38px; flex-shrink: 0; border-radius: 50%;
+  background: linear-gradient(135deg, var(--a), #7460f0); border: none;
+  color: #fff; font-size: .88rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .12s; outline: none;
+  position: relative; z-index: 1;
+}
+.send-btn:active { transform: scale(.88); }
+.attach-btn {
+  width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%;
+  background: var(--inp); border: 1.5px solid var(--bor);
+  color: var(--sub); font-size: .82rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s; outline: none;
+  position: relative; z-index: 1;
+}
+.attach-btn:active { border-color: var(--a); color: var(--a); }
+#fileIn { display: none; }
+
+/* TOAST */
+#toast {
+  position: fixed; bottom: 5rem; left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  background: rgba(13,13,20,.97); border: 1px solid var(--bor);
+  padding: .46rem 1.1rem; border-radius: 22px;
+  font-size: .67rem; opacity: 0; transition: all .25s;
+  pointer-events: none; z-index: 9998;
+  max-width: 88vw; text-align: center; word-break: break-word;
+  box-shadow: 0 4px 24px rgba(0,0,0,.55);
+}
+#toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* RECONNECT POPUP */
+#reconnPopup {
+  position: fixed; top: calc(3.8rem + env(safe-area-inset-top)); right: .8rem;
+  background: var(--card); border: 1.5px solid rgba(251,191,36,.3);
+  border-radius: 12px; padding: .75rem .9rem; z-index: 500;
+  display: none; flex-direction: column; gap: .5rem;
+  box-shadow: 0 6px 28px rgba(0,0,0,.55); min-width: 210px;
+  animation: popIn .25s ease;
+}
+#reconnPopup.on { display: flex; }
+@keyframes popIn { from{opacity:0;transform:translateX(18px)} to{opacity:1;transform:none} }
+.rp-title { font-size: .67rem; font-weight: 600; color: var(--warn); }
+.rp-sub { font-size: .59rem; color: var(--sub); }
+.rp-btns { display: flex; gap: .4rem; }
+.rp-btn {
+  flex: 1; padding: .42rem .5rem; border-radius: 7px; border: none;
+  font-family: inherit; font-size: .63rem; font-weight: 500;
+  cursor: pointer; transition: opacity .15s;
+  position: relative; z-index: 1;
+}
+.rp-yes { background: rgba(74,222,128,.1); color: var(--ok); border: 1px solid rgba(74,222,128,.2); }
+.rp-yes:hover { opacity: .8; }
+.rp-no { background: var(--inp); color: var(--sub); }
+
+/* MODAL */
+.mbg {
+  position: fixed; inset: 0; background: rgba(0,0,0,.8);
+  backdrop-filter: blur(12px); z-index: 600;
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem; opacity: 0; pointer-events: none; transition: opacity .25s;
+}
+.mbg.on { opacity: 1; pointer-events: all; }
+.mbox {
+  background: var(--card); border: 1px solid var(--bor);
+  border-radius: var(--rad); padding: 1.4rem;
+  width: min(360px, 100%); display: flex; flex-direction: column;
+  gap: .9rem; max-height: 88vh; overflow-y: auto;
+}
+.mbox h3 { font-size: 1rem; font-weight: 600; color: var(--a); }
+.minfo { font-size: .71rem; line-height: 1.88; color: var(--sub); }
+.minfo b { color: var(--txt); }
+.chip { display: inline-block; padding: .1rem .45rem; border-radius: 5px; font-size: .55rem; background: rgba(74,222,128,.07); border: 1px solid rgba(74,222,128,.17); color: var(--ok); margin: .07rem; }
+
+/* SCREENSHOT BLOCK */
+#scBlock {
+  position: fixed; inset: 0; background: #000; z-index: 9999;
+  display: none; align-items: center; justify-content: center;
+  flex-direction: column; gap: .8rem; text-align: center; padding: 2rem;
+}
+#scBlock.on { display: flex; }
+#scBlock .sc-i { font-size: 3rem; opacity: .35; }
+#scBlock p { font-size: .72rem; color: var(--sub); max-width: 230px; line-height: 1.72; }
+
+/* LIGHTBOX */
+#lb { position: fixed; inset: 0; background: rgba(0,0,0,.97); z-index: 700; display: none; align-items: center; justify-content: center; cursor: pointer; }
+#lb.on { display: flex; }
+#lbImg { max-width: 95vw; max-height: 90vh; border-radius: 10px; object-fit: contain; }
 </style>
 </head>
 <body>
+<div id="app">
 
-<div id="setup">
+<!-- ════════ SETUP ════════ -->
+<div class="view on" id="vSetup">
 <div class="si">
-  <div class="logo">
+
+  <div class="brand">
     <h1>Only <b>Us</b></h1>
-    <p>end-to-end encrypted</p>
-    <div class="sbadge">🔒 PBKDF2-256 · X25519 · XSalsa20-Poly1305</div>
+    <div class="brand-p">end-to-end encrypted · peer to peer</div>
+    <div class="badge badge-g">🔒 PBKDF2-256 · X25519 · XSalsa20</div>
+    <br>
+    <div class="badge badge-a">⚡ Cloudflare edge signaling</div>
   </div>
 
-  <div class="card" id="mainCard">
-    <div class="ct">Connect</div>
-    <div class="f">
+  <!-- MAIN CARD -->
+  <div class="card" id="cMain">
+    <div class="card-t">Start</div>
+
+    <div class="field">
       <label>Your name</label>
-      <input type="text" id="nameIn" placeholder="Enter your name" maxlength="20"
-        autocomplete="off" autocorrect="off" spellcheck="false"/>
+      <input class="inp" type="text" id="inName" placeholder="Enter your name"
+        maxlength="20" autocomplete="off" autocorrect="off" spellcheck="false"/>
     </div>
-    <div class="f">
-      <label>Shared passphrase <span style="color:var(--sub);font-size:.52rem;">— both use same</span></label>
-      <div class="pw-wrap">
-        <input type="password" id="passIn" placeholder="Make it strong"
-          autocomplete="new-password" oninput="checkStr(this.value)"/>
-        <button class="eye" type="button" id="eyeBtn" onclick="togglePw()">👁️</button>
+
+    <div class="field">
+      <label>Shared passphrase <span style="color:var(--sub);font-size:.5rem">— both use same</span></label>
+      <!-- pw-row is now a flex row — button sits beside input, no overlap -->
+      <div class="pw-row">
+        <input class="inp" type="password" id="inPass"
+          placeholder="Enter passphrase" autocomplete="new-password"
+          oninput="onPassInput(this.value)"/>
+        <button class="eye-btn" type="button" id="eyeBtn"
+          aria-label="Show or hide password">👁</button>
       </div>
-      <div class="smeter">
-        <div class="sm" id="s1"></div><div class="sm" id="s2"></div>
-        <div class="sm" id="s3"></div><div class="sm" id="s4"></div>
+      <div class="str-row">
+        <div class="str-seg" id="sb1"></div>
+        <div class="str-seg" id="sb2"></div>
+        <div class="str-seg" id="sb3"></div>
+        <div class="str-seg" id="sb4"></div>
       </div>
-      <div class="slbl" id="slbl"></div>
+      <div class="str-lbl" id="strLbl"></div>
     </div>
-    <div class="kpw" id="kpw">
-      <div class="kpl"><span>Deriving 256-bit key…</span><b id="kpct">0%</b></div>
-      <div class="kpb-bg"><div class="kpb" id="kpb"></div></div>
+
+    <div class="kdf-wrap" id="kdfWrap">
+      <div class="kdf-top"><span>Deriving 256-bit key…</span><b id="kdfPct">0%</b></div>
+      <div class="kdf-track"><div class="kdf-bar" id="kdfBar"></div></div>
     </div>
-    <div class="or">connect via</div>
-    <div class="r2">
-      <button class="btn bp" id="createBtn" onclick="goCreate()">Create room</button>
-      <button class="btn bs" id="joinBtn" onclick="goJoin()">Join room</button>
+
+    <div class="divider">connect via</div>
+
+    <div class="btn-row">
+      <button class="btn btn-p" id="btnCreate" type="button" onclick="goCreate()">Create room</button>
+      <button class="btn btn-s" id="btnJoin"   type="button" onclick="goJoin()">Join room</button>
     </div>
   </div>
 
-  <div class="card" id="createCard" style="display:none;">
-    <div class="ct">Your room</div>
-    <div class="cdisp">
-      <div class="cbig" id="codeOut">——</div>
-      <div class="csub">Share this code with them</div>
+  <!-- CREATE CARD -->
+  <div class="card" id="cCreate" style="display:none">
+    <div class="card-t">Your room</div>
+    <div class="code-box">
+      <div class="code-num" id="codeOut">——</div>
+      <div class="code-hint">Share this code · max 2 people</div>
     </div>
-    <div class="sl"><span class="dot y" id="hDot"></span><span id="hTxt">Connecting…</span></div>
-    <div class="dbg" id="hDbg">Starting…</div>
-    <button class="btn bs" onclick="copyCode()">Copy code</button>
-    <button class="btn bs" onclick="goBack()">← Back</button>
+    <div class="steps">
+      <div class="step sa" id="hs1"><span class="si">⚡</span>Connecting to Cloudflare…</div>
+      <div class="step"    id="hs2"><span class="si">⏳</span>Waiting for them…</div>
+      <div class="step"    id="hs3"><span class="si">🔑</span>Exchanging keys…</div>
+      <div class="step"    id="hs4"><span class="si">✦</span>P2P tunnel active</div>
+    </div>
+    <button class="btn btn-s" type="button" onclick="copyCode()">Copy code</button>
+    <button class="btn btn-s" type="button" onclick="goBack()">← Back</button>
   </div>
 
-  <div class="card" id="joinCard" style="display:none;">
-    <div class="ct">Join room</div>
-    <div class="f">
+  <!-- JOIN CARD -->
+  <div class="card" id="cJoin" style="display:none">
+    <div class="card-t">Join room</div>
+    <div class="field">
       <label>Room code</label>
-      <input type="text" id="codeIn" placeholder="Enter code" maxlength="8"
+      <input class="inp" type="text" id="inCode" placeholder="Enter code" maxlength="8"
         autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
         oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/>
     </div>
-    <div class="sl"><span class="dot y" id="jDot" style="display:none"></span><span id="jTxt"></span></div>
-    <div class="dbg" id="jDbg" style="display:none;">Starting…</div>
-    <button class="btn bp" id="joinBtn2" onclick="doJoin()">Connect →</button>
-    <button class="btn bs" onclick="goBack()">← Back</button>
+    <div class="steps" id="jSteps" style="display:none">
+      <div class="step sa" id="js1"><span class="si">⚡</span>Connecting to Cloudflare…</div>
+      <div class="step"    id="js2"><span class="si">🔍</span>Finding room…</div>
+      <div class="step"    id="js3"><span class="si">🔑</span>Exchanging keys…</div>
+      <div class="step"    id="js4"><span class="si">✦</span>P2P tunnel active</div>
+    </div>
+    <button class="btn btn-p" id="btnConn" type="button" onclick="doJoin()">Connect →</button>
+    <button class="btn btn-s" type="button" onclick="goBack()">← Back</button>
   </div>
 
 </div>
 </div>
 
-<div id="chat">
-  <div id="vcol">
-    <div id="topbar">
-      <div class="tl">
-        <div class="tn">Only Us</div>
-        <div class="ts"><span class="dot y" id="cDot"></span><span id="cTxt">connecting…</span></div>
+<!-- ════════ CHAT ════════ -->
+<div class="view" id="vChat">
+  <div id="vidCol">
+    <div id="topBar">
+      <div class="top-l">
+        <div class="top-name">Only Us</div>
+        <div class="top-stat">
+          <span class="sdot y" id="cDot"></span>
+          <span id="cLbl">connecting…</span>
+        </div>
       </div>
-      <div class="tr">
-        <button class="ic" id="camBtn" onclick="toggleCam()">📷</button>
-        <button class="ic" id="micBtn" onclick="toggleMic()">🎙️</button>
-        <button class="ic" onclick="G('infoM').classList.add('on')">🔒</button>
-        <button class="ic red" onclick="endSess()">✕</button>
+      <div class="top-r">
+        <div id="bellWrap">
+          <div class="bell-ring"></div>
+          <button class="ic-btn warn-c" type="button" onclick="sendReconnReq()" title="Reconnect">🔔</button>
+        </div>
+        <button class="ic-btn" id="btnCam" type="button" onclick="toggleCam()" title="Video">📷</button>
+        <button class="ic-btn" id="btnMic" type="button" onclick="toggleMic()" title="Mic">🎙</button>
+        <button class="ic-btn" type="button" onclick="showInfo()" title="Security info">🔒</button>
+        <button class="ic-btn danger" type="button" onclick="endSess()" title="End session">✕</button>
       </div>
     </div>
-    <div id="vwrap">
-      <div class="voff" id="voff"><i>📷</i><div>video off</div></div>
-      <video id="remV" autoplay playsinline></video>
-      <video id="locV" autoplay playsinline muted></video>
+    <div id="vidWrap">
+      <div class="vid-off-bg" id="vidOff">
+        <div class="vid-off-icon">📷</div>
+        <div>video off</div>
+      </div>
+      <video id="remVid" autoplay playsinline></video>
+      <video id="locVid" autoplay playsinline muted></video>
     </div>
   </div>
-  <div id="mcol">
-    <div id="msgs"></div>
-    <div class="ibar">
-      <div class="ir">
-        <input type="file" id="fi" accept="image/*" onchange="sendImg(event)"/>
-        <button class="att" onclick="G('fi').click()">📎</button>
-        <textarea id="mi" placeholder="Message…" rows="1"
-          onkeydown="onKey(event)" oninput="rsz(this)"></textarea>
-        <button class="snd" onclick="sendMsg()">➤</button>
+  <div id="msgCol">
+    <div id="msgList"></div>
+    <div id="inputBar">
+      <div class="input-row">
+        <input type="file" id="fileIn" accept="image/*" onchange="onFile(event)"/>
+        <button class="attach-btn" type="button" onclick="G('fileIn').click()" title="Send image">📎</button>
+        <textarea id="msgIn" rows="1" placeholder="Message…"
+          onkeydown="onKey(event)" oninput="grow(this)"></textarea>
+        <button class="send-btn" type="button" onclick="sendMsg()" title="Send">➤</button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- RECONNECT POPUP -->
+<div id="reconnPopup">
+  <div class="rp-title">🔔 Reconnect request</div>
+  <div class="rp-sub" id="reconnSub">They want to reconnect</div>
+  <div class="rp-btns">
+    <button class="rp-btn rp-yes" type="button" onclick="acceptReconn()">Accept ✦</button>
+    <button class="rp-btn rp-no"  type="button" onclick="hideReconn()">Dismiss</button>
+  </div>
+</div>
+
+<!-- SCREENSHOT BLOCK -->
+<div id="scBlock">
+  <div class="sc-i">🚫</div>
+  <div style="font-size:.92rem;font-weight:600">Screenshot blocked</div>
+  <p>Only Us protects your privacy. Screenshots and screen recording are not allowed.</p>
+</div>
+
+<!-- WRONG PASSWORD MODAL -->
+<div class="mbg" id="wrongPwM">
+  <div class="mbox" style="text-align:center;gap:1rem">
+    <div style="font-size:2.5rem">🔐</div>
+    <h3 style="color:var(--err)">Wrong passphrase</h3>
+    <div class="minfo">
+      <p>The passphrases <b>don't match</b>.<br>Both of you must enter the <b>exact same</b> passphrase.</p>
+      <br>
+      <p style="font-size:.65rem;background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.18);padding:.7rem;border-radius:8px;color:var(--err)">
+        ⚠️ No messages were exchanged.<br>Connection blocked for security.
+      </p>
+    </div>
+    <button class="btn btn-p" type="button" onclick="hideWrongPw()" style="background:linear-gradient(135deg,var(--err),#e05555)">Try again</button>
+  </div>
+</div>
+
+<!-- INFO MODAL -->
 <div class="mbg" id="infoM">
-  <div class="modal">
+  <div class="mbox">
     <h3>🔒 Security</h3>
     <div class="minfo">
-      <p><b>Password → 256-bit key</b><br>
-      <span class="chip">PBKDF2-SHA512</span> 600,000 iterations.</p>
-      <p style="margin-top:.6rem;"><b>Key exchange</b><br>
-      <span class="chip">X25519 ECDH</span> Private key never leaves device.</p>
-      <p style="margin-top:.6rem;"><b>Messages &amp; photos</b><br>
-      <span class="chip">XSalsa20-Poly1305</span> Same as Signal.</p>
-      <p style="margin-top:.6rem;"><b>Video</b><br>
-      <span class="chip">DTLS-SRTP</span> WebRTC E2EE.</p>
-      <p style="margin-top:.6rem;"><b>No storage</b> — Close tab = gone.</p>
+      <p><b>Signaling — Cloudflare Workers</b><br>
+        <span class="chip">Private edge server</span> Your own Cloudflare Worker — Mumbai/Delhi nodes. Only WebRTC routing data. Never your messages or keys.</p>
+      <p style="margin-top:.6rem"><b>Password → 256-bit key</b><br>
+        <span class="chip">PBKDF2-SHA512</span> 600,000 iterations. Full 256-bit output always.</p>
+      <p style="margin-top:.6rem"><b>Key exchange</b><br>
+        <span class="chip">X25519 ECDH</span> Final key = SHA-512(DH ‖ PBKDF2). Both must match.</p>
+      <p style="margin-top:.6rem"><b>Messages &amp; photos</b><br>
+        <span class="chip">XSalsa20-Poly1305</span> Same as Signal. Unique nonce every message.</p>
+      <p style="margin-top:.6rem"><b>Video &amp; voice</b><br>
+        <span class="chip">DTLS-SRTP</span> WebRTC browser E2EE.</p>
+      <p style="margin-top:.6rem"><b>Anti-screenshot</b> · <b>Max 2 users</b> · <b>Key wipe on disconnect (60s)</b> · <b>Zero storage</b></p>
     </div>
-    <button class="btn bp" onclick="G('infoM').classList.remove('on')">Got it</button>
+    <button class="btn btn-p" type="button" onclick="hideInfo()">Got it</button>
   </div>
 </div>
 
-<div id="lb" onclick="closeLB()"><img id="lbi" src="" alt=""/></div>
+<div id="lb" onclick="hideLB()"><img id="lbImg" src="" alt=""/></div>
 <div id="toast"></div>
+</div>
 
 <script>
 'use strict';
 
-// ─── KDF ────────────────────────────────────────────
-const KDF_SALT = new TextEncoder().encode('onlyus-v5-2024');
-async function deriveKey(pass) {
-  setProg(true,5); await tick();
+// ══════════════════════════════════════
+//  ⚡ PASTE YOUR CLOUDFLARE WORKER URL
+//  e.g. https://onlyus.yourname.workers.dev
+// ══════════════════════════════════════
+const CF_URL = 'PASTE_YOUR_WORKER_URL_HERE';
+
+// ══════════════════════════════════════
+//  WEBRTC ICE CONFIG
+// ══════════════════════════════════════
+const RTC_CFG = {
+  iceServers: [
+    { urls:'stun:stun.l.google.com:19302'    },
+    { urls:'stun:stun1.l.google.com:19302'   },
+    { urls:'stun:stun2.l.google.com:19302'   },
+    { urls:'stun:stun.cloudflare.com:3478'   },
+    { urls:'stun:stun.nextcloud.com:3478'    },
+    { urls:'turn:openrelay.metered.ca:80',        username:'openrelayproject', credential:'openrelayproject' },
+    { urls:'turn:openrelay.metered.ca:443',       username:'openrelayproject', credential:'openrelayproject' },
+    { urls:'turn:openrelay.metered.ca:443?transport=tcp', username:'openrelayproject', credential:'openrelayproject' }
+  ],
+  iceCandidatePoolSize: 10,
+  iceTransportPolicy: 'all',
+  bundlePolicy: 'max-bundle',
+  rtcpMuxPolicy: 'require'
+};
+
+// ══════════════════════════════════════
+//  CLOUDFLARE API
+// ══════════════════════════════════════
+async function cfWrite(room, action, data) {
+  try {
+    await fetch(`${CF_URL}?a=${action}&r=${room}`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch(e) { console.warn('cfWrite fail', e); }
+}
+
+async function cfRead(room, action) {
+  try {
+    const r = await fetch(`${CF_URL}?a=${action}&r=${room}`);
+    const j = await r.json();
+    return j.data ? JSON.parse(j.data) : null;
+  } catch { return null; }
+}
+
+async function cfPoll(room, action, timeoutMs=30000, intervalMs=1200) {
+  const end = Date.now() + timeoutMs;
+  while (Date.now() < end) {
+    const d = await cfRead(room, action);
+    if (d) return d;
+    await wait(intervalMs);
+  }
+  return null;
+}
+
+// ══════════════════════════════════════
+//  KDF — PBKDF2-SHA512 → 256 bits
+// ══════════════════════════════════════
+const KDF_SALT = new TextEncoder().encode('onlyus-cf-v1-final');
+
+async function deriveKey(pw) {
+  kdfUI(true, 5); await wait(10);
   const mat = await crypto.subtle.importKey(
-    'raw', new TextEncoder().encode(pass.trim()), 'PBKDF2', false, ['deriveBits']);
-  setProg(true,20); await tick();
+    'raw', new TextEncoder().encode(pw.trim()), 'PBKDF2', false, ['deriveBits']
+  );
+  kdfUI(true, 22); await wait(10);
   const bits = await crypto.subtle.deriveBits(
-    {name:'PBKDF2',hash:'SHA-512',salt:KDF_SALT,iterations:600000}, mat, 256);
-  setProg(true,100); await tick(80); setProg(false,0);
+    { name:'PBKDF2', hash:'SHA-512', salt:KDF_SALT, iterations:600000 }, mat, 256
+  );
+  kdfUI(true, 100); await wait(80);
+  kdfUI(false, 0);
   return new Uint8Array(bits);
 }
-function setProg(on,p){G('kpw').classList.toggle('on',on);G('kpb').style.width=p+'%';G('kpct').textContent=p+'%';}
-function tick(ms=10){return new Promise(r=>setTimeout(r,ms));}
 
-// ─── CRYPTO ─────────────────────────────────────────
+function kdfUI(on, p) {
+  G('kdfWrap').classList.toggle('on', on);
+  G('kdfBar').style.width = p + '%';
+  G('kdfPct').textContent = p + '%';
+}
+
+// ══════════════════════════════════════
+//  CRYPTO
+// ══════════════════════════════════════
 let KP=null, SK=null, PH=null;
-function genKP(){KP=nacl.box.keyPair();}
-function buildSK(pub64,kdfKey){
-  const dh=nacl.scalarMult(KP.secretKey,nacl.util.decodeBase64(pub64));
-  const mix=new Uint8Array(64); mix.set(dh,0); mix.set(kdfKey,32);
-  return nacl.hash(mix).slice(0,32);
-}
-function enc(t){const n=nacl.randomBytes(24);return b64(n)+'.'+b64(nacl.secretbox(utf8(t),n,SK));}
-function dec(p){try{const i=p.indexOf('.');const o=nacl.secretbox.open(db64(p.slice(i+1)),db64(p.slice(0,i)),SK);return o?nacl.util.encodeUTF8(o):null;}catch(e){return null;}}
-function encB(b){const n=nacl.randomBytes(24);return b64(n)+'.'+b64(nacl.secretbox(b,n,SK));}
-function decB(p){try{const i=p.indexOf('.');return nacl.secretbox.open(db64(p.slice(i+1)),db64(p.slice(0,i)),SK);}catch(e){return null;}}
-const b64=nacl.util.encodeBase64, db64=nacl.util.decodeBase64, utf8=nacl.util.decodeUTF8;
 
-// ─── PASSWORD UI ────────────────────────────────────
-let pwVis=false;
-function togglePw(){pwVis=!pwVis;G('passIn').type=pwVis?'text':'password';G('eyeBtn').textContent=pwVis?'🙈':'👁️';G('passIn').focus();}
-function checkStr(pw){
-  let s=0;
-  if(pw.length>=6)s++;if(pw.length>=12)s++;
-  if(/[A-Za-z]/.test(pw)&&/[0-9]/.test(pw))s++;
-  if(/[!@#$%^&*_\-]/.test(pw))s++;
-  const c=['','sw','sw','so','sg'],l=['','Weak','Weak','Fair — add more','Strong ✦'];
-  for(let i=1;i<=4;i++)G('s'+i).className='sm'+(i<=s?' '+c[s]:'');
-  G('slbl').textContent=pw.length?(l[s]||'Weak'):'';
+function freshKP() { KP = nacl.box.keyPair(); }
+
+function buildSK(pub64, kdf) {
+  const dh  = nacl.scalarMult(KP.secretKey, db64(pub64));
+  const mix = new Uint8Array(64);
+  mix.set(dh, 0); mix.set(kdf, 32);
+  return nacl.hash(mix).slice(0, 32);
 }
 
-// ─── STATE ──────────────────────────────────────────
-let peer=null, conn=null, vcall=null, stream=null;
-let roomCode='', myName='';
+const b64  = nacl.util.encodeBase64;
+const db64 = nacl.util.decodeBase64;
+
+function encT(t) {
+  const n = nacl.randomBytes(24);
+  return b64(n) + '.' + b64(nacl.secretbox(nacl.util.decodeUTF8(t), n, SK));
+}
+function decT(p) {
+  try {
+    const i = p.indexOf('.');
+    const o = nacl.secretbox.open(db64(p.slice(i+1)), db64(p.slice(0,i)), SK);
+    return o ? nacl.util.encodeUTF8(o) : null;
+  } catch { return null; }
+}
+function encBin(x) {
+  const n = nacl.randomBytes(24);
+  return b64(n) + '.' + b64(nacl.secretbox(x, n, SK));
+}
+function decBin(p) {
+  try {
+    const i = p.indexOf('.');
+    return nacl.secretbox.open(db64(p.slice(i+1)), db64(p.slice(0,i)), SK);
+  } catch { return null; }
+}
+
+// ══════════════════════════════════════
+//  PASSWORD TOGGLE — dead simple
+// ══════════════════════════════════════
+let pwVisible = false;
+
+function toggleEye() {
+  pwVisible = !pwVisible;
+  const inp = G('inPass');
+  inp.type = pwVisible ? 'text' : 'password';
+  G('eyeBtn').textContent = pwVisible ? '🙈' : '👁';
+  inp.focus();
+  try { const l=inp.value.length; inp.setSelectionRange(l,l); } catch {}
+}
+
+// Single listener — handles both mouse and touch cleanly
+G('eyeBtn').addEventListener('pointerdown', e => {
+  e.preventDefault(); // stops focus leaving the input
+  toggleEye();
+});
+
+function onPassInput(pw) {
+  let s = 0;
+  if (pw.length >= 6)  s++;
+  if (pw.length >= 12) s++;
+  if (/[A-Za-z]/.test(pw) && /[0-9]/.test(pw)) s++;
+  if (/[^A-Za-z0-9]/.test(pw)) s++;
+  const cls = ['', 's-r', 's-r', 's-o', 's-g'];
+  const lbl = ['', 'Weak', 'Weak', 'Fair — add a symbol', 'Strong ✦'];
+  for (let i=1; i<=4; i++)
+    G('sb'+i).className = 'str-seg' + (i<=s ? ' '+cls[s] : '');
+  G('strLbl').textContent = pw.length ? (lbl[s] || '') : '';
+}
+
+// ══════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════
+let pc=null, dc=null, mediaStream=null;
+let roomCode='', myName='', peerName='';
+let isHost=false, roomLocked=false;
 let camOn=false, micOn=false;
+let wipeTimer=null;
+let pendingICE=[];
 
-// ─── VALIDATE ───────────────────────────────────────
-async function validate(){
-  myName=G('nameIn').value.trim();
-  const pass=G('passIn').value;
-  if(!myName){toast('Enter your name');return false;}
-  if(!pass.trim()){toast('Enter a passphrase');return false;}
-  G('createBtn').disabled=true; G('joinBtn').disabled=true;
-  try{PH=await deriveKey(pass);}
-  catch(e){toast('Key derivation failed');G('createBtn').disabled=false;G('joinBtn').disabled=false;return false;}
-  G('createBtn').disabled=false; G('joinBtn').disabled=false;
+// ══════════════════════════════════════
+//  VALIDATE & NAVIGATE
+// ══════════════════════════════════════
+async function validate() {
+  myName = G('inName').value.trim();
+  const pw = G('inPass').value;
+  if (!myName)       { toast('Enter your name'); return false; }
+  if (!pw.trim())    { toast('Enter a passphrase'); return false; }
+  if (pw.length < 4) { toast('Passphrase too short'); return false; }
+  if (CF_URL === 'PASTE_YOUR_WORKER_URL_HERE') {
+    toast('⚠️ Add your Cloudflare Worker URL first'); return false;
+  }
+  lockBtns(true);
+  try { PH = await deriveKey(pw); }
+  catch { toast('Key derivation failed'); lockBtns(false); return false; }
+  lockBtns(false);
   return !!PH;
 }
 
-function makeCode(){const C='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return Array.from(nacl.randomBytes(6),b=>C[b%C.length]).join('');}
-
-function showCard(id){['mainCard','createCard','joinCard'].forEach(c=>G(c).style.display=c===id?'':'none');}
-function log(el,msg){const d=G(el);if(d){d.textContent=msg;console.log('[onlyus]',msg);}}
-function logA(el,msg){const d=G(el);if(d){d.textContent+=(d.textContent?'\n':'')+msg;d.scrollTop=d.scrollHeight;console.log('[onlyus]',msg);}}
-
-async function goCreate(){
-  if(!(await validate()))return;
-  showCard('createCard'); genKP();
-  roomCode=makeCode(); G('codeOut').textContent=roomCode;
-  log('hDbg','Connecting to relay…'); initHost();
-}
-async function goJoin(){
-  if(!(await validate()))return;
-  showCard('joinCard');
-  G('jDbg').style.display='none';
-  G('jDot').style.display='none';
-  G('jTxt').textContent='';
-}
-function goBack(){
-  showCard('mainCard');
-  if(peer){try{peer.destroy();}catch(e){}}
-  peer=null; conn=null;
-}
-function copyCode(){
-  navigator.clipboard.writeText(roomCode).then(()=>toast('Code copied! ✦')).catch(()=>toast('Code: '+roomCode));
+function lockBtns(on) {
+  G('btnCreate').disabled = on;
+  G('btnJoin').disabled   = on;
 }
 
-// ─── HOST ────────────────────────────────────────────
-function initHost(){
-  if(peer){try{peer.destroy();}catch(e){}}
-  // Use default PeerJS server + extra STUN
-  peer=new Peer('ou7-'+roomCode.toLowerCase()+'-h',{
-    debug:2,
-    config:{iceServers:[
-      {urls:'stun:stun.l.google.com:19302'},
-      {urls:'stun:stun1.l.google.com:19302'},
-      {urls:'stun:stun.cloudflare.com:3478'}
-    ]}
-  });
-  setHS('y','Waiting for PeerJS…');
-  peer.on('open',id=>{
-    setHS('g','Ready ✦ waiting for them to join…');
-    logA('hDbg','Connected to relay. ID: '+id);
-  });
-  peer.on('connection',c=>{
-    logA('hDbg','Incoming connection from: '+c.peer);
-    conn=c; setupConn();
-  });
-  peer.on('call',answerCall);
-  peer.on('error',e=>{
-    setHS('rd','Error: '+e.type);
-    logA('hDbg','ERROR: '+e.type+' — '+e.message);
-    if(e.type==='unavailable-id'){
-      roomCode=makeCode(); G('codeOut').textContent=roomCode;
-      logA('hDbg','ID taken — new code: '+roomCode);
-      setTimeout(initHost,800);
+function makeCode() {
+  const C = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from(nacl.randomBytes(6), b => C[b%C.length]).join('');
+}
+
+async function goCreate() {
+  if (!(await validate())) return;
+  showCard('cCreate'); isHost=true; freshKP(); roomLocked=false;
+  roomCode = makeCode(); G('codeOut').textContent = roomCode;
+  hostFlow();
+}
+
+async function goJoin() {
+  if (!(await validate())) return;
+  showCard('cJoin'); isHost=false;
+}
+
+function goBack() {
+  showCard('cMain'); cleanup();
+  G('jSteps').style.display='none';
+  G('btnConn').disabled=false;
+}
+
+function copyCode() {
+  navigator.clipboard.writeText(roomCode)
+    .then(() => toast('Code copied! ✦'))
+    .catch(() => toast('Code: ' + roomCode));
+}
+
+function showCard(id) {
+  ['cMain','cCreate','cJoin'].forEach(c =>
+    G(c).style.display = c===id ? '' : 'none'
+  );
+}
+
+// ══════════════════════════════════════
+//  HOST FLOW
+// ══════════════════════════════════════
+async function hostFlow() {
+  hStep(1,'a');
+  try {
+    await cfWrite(roomCode,'offer',null);
+    await cfWrite(roomCode,'answer',null);
+    await cfWrite(roomCode,'locked',false);
+
+    pc = new RTCPeerConnection(RTC_CFG);
+    dc = pc.createDataChannel('ou', {ordered:true});
+    wireDC(dc);
+
+    let iceBuffer = [];
+    pc.onicecandidate = e => { if(e.candidate) iceBuffer.push(e.candidate.toJSON()); };
+    pc.onicegatheringstatechange = async () => {
+      if (pc.iceGatheringState==='complete' && iceBuffer.length) {
+        await cfWrite(roomCode, 'hice', iceBuffer);
+      }
+    };
+    pc.oniceconnectionstatechange = () => {
+      if (['connected','completed'].includes(pc.iceConnectionState)) {
+        hStep(4,'d'); setCS('g','encrypted · P2P connected');
+      }
+      if (pc.iceConnectionState==='failed') pc.restartIce?.();
+    };
+    pc.ontrack = e => {
+      if (e.streams?.[0]) {
+        G('remVid').srcObject = e.streams[0];
+        G('vidWrap').classList.add('on');
+        G('vidOff').style.display='none';
+      }
+    };
+
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    await cfWrite(roomCode,'offer',{sdp:offer.sdp,type:offer.type,ts:Date.now()});
+    hStep(2,'a');
+
+    const ans = await cfPoll(roomCode,'answer',120000,1500);
+    if (!ans) { hStep(2,'e'); toast('Timed out — nobody joined'); return; }
+
+    hStep(3,'a');
+    await pc.setRemoteDescription(new RTCSessionDescription(ans));
+
+    const jice = await cfPoll(roomCode,'jice',15000,1000);
+    if (jice) {
+      for (const c of jice)
+        await pc.addIceCandidate(new RTCIceCandidate(c)).catch(()=>{});
     }
-  });
-  peer.on('disconnected',()=>{
-    logA('hDbg','Disconnected from relay — reconnecting…');
-    try{peer.reconnect();}catch(e){}
-  });
+    for (const c of pendingICE)
+      await pc.addIceCandidate(new RTCIceCandidate(c)).catch(()=>{});
+    pendingICE = [];
+
+    roomLocked = true;
+    await cfWrite(roomCode,'locked',true);
+    hStep(3,'d'); hStep(4,'a');
+  } catch(e) {
+    hStep(1,'e'); toast('Error — check internet & try again');
+    console.error(e);
+  }
 }
 
-// ─── JOIN ────────────────────────────────────────────
-function doJoin(){
-  const code=G('codeIn').value.trim().toUpperCase();
-  if(code.length<4){toast('Enter the room code');return;}
-  roomCode=code; genKP();
-  G('jDbg').style.display='block'; G('jDot').style.display='inline-block';
-  log('jDbg','Connecting to relay…'); setJS('y','Connecting…');
-  G('joinBtn2').disabled=true;
+// ══════════════════════════════════════
+//  JOIN FLOW
+// ══════════════════════════════════════
+function doJoin() {
+  const code = G('inCode').value.trim().toUpperCase();
+  if (code.length < 4) { toast('Enter the room code'); return; }
+  roomCode=code; freshKP();
+  G('jSteps').style.display='flex';
+  G('btnConn').disabled=true;
+  jStep(1,'a');
+  joinFlow();
+}
 
-  if(peer){try{peer.destroy();}catch(e){}}
-  const gid='ou7-'+code.toLowerCase()+'-g'+Date.now().toString(36).slice(-5);
-  const hid='ou7-'+code.toLowerCase()+'-h';
-
-  peer=new Peer(gid,{
-    debug:2,
-    config:{iceServers:[
-      {urls:'stun:stun.l.google.com:19302'},
-      {urls:'stun:stun1.l.google.com:19302'},
-      {urls:'stun:stun.cloudflare.com:3478'}
-    ]}
-  });
-
-  peer.on('open',id=>{
-    logA('jDbg','Connected to relay. My ID: '+id);
-    logA('jDbg','Connecting to host: '+hid);
-    setJS('y','Finding room…');
-    // KEY FIX: use default serialization (not json) for max compatibility
-    conn=peer.connect(hid,{reliable:true});
-    setupConn();
-  });
-
-  peer.on('call',answerCall);
-
-  peer.on('error',e=>{
-    G('joinBtn2').disabled=false;
-    setJS('rd','Error: '+e.type);
-    logA('jDbg','ERROR: '+e.type);
-    if(e.type==='peer-unavailable'){
-      toast('Room not found — make sure they created it first');
-    } else {
-      toast('Error: '+e.type+' — check internet');
+async function joinFlow() {
+  try {
+    const locked = await cfRead(roomCode,'locked');
+    if (locked===true) {
+      toast('Room is full — max 2 users');
+      jStep(2,'e'); G('btnConn').disabled=false; return;
     }
-  });
+
+    jStep(2,'a');
+    const offer = await cfPoll(roomCode,'offer',30000,1200);
+    if (!offer?.sdp) {
+      toast('Room not found — check code & make sure they created first');
+      jStep(2,'e'); G('btnConn').disabled=false; return;
+    }
+    if (Date.now()-offer.ts > 900000) {
+      toast('Room expired — ask them to create a new one');
+      jStep(2,'e'); G('btnConn').disabled=false; return;
+    }
+
+    jStep(3,'a');
+    pc = new RTCPeerConnection(RTC_CFG);
+    pc.ondatachannel = e => { dc=e.channel; wireDC(dc); };
+
+    let iceBuffer = [];
+    pc.onicecandidate = e => { if(e.candidate) iceBuffer.push(e.candidate.toJSON()); };
+    pc.onicegatheringstatechange = async () => {
+      if (pc.iceGatheringState==='complete' && iceBuffer.length)
+        await cfWrite(roomCode,'jice',iceBuffer);
+    };
+    pc.oniceconnectionstatechange = () => {
+      if (['connected','completed'].includes(pc.iceConnectionState)) {
+        jStep(4,'d'); setCS('g','encrypted · P2P connected');
+      }
+      if (pc.iceConnectionState==='failed') pc.restartIce?.();
+    };
+    pc.ontrack = e => {
+      if (e.streams?.[0]) {
+        G('remVid').srcObject=e.streams[0];
+        G('vidWrap').classList.add('on');
+        G('vidOff').style.display='none';
+      }
+    };
+
+    await pc.setRemoteDescription(new RTCSessionDescription(offer));
+
+    const hice = await cfPoll(roomCode,'hice',15000,1000);
+    if (hice) {
+      for (const c of hice)
+        await pc.addIceCandidate(new RTCIceCandidate(c)).catch(()=>{});
+    }
+
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    await cfWrite(roomCode,'answer',{sdp:answer.sdp,type:answer.type});
+    jStep(3,'d'); jStep(4,'a');
+  } catch(e) {
+    jStep(2,'e'); G('btnConn').disabled=false;
+    toast('Error — check internet & try again');
+    console.error(e);
+  }
 }
 
-// ─── CONNECTION SETUP (CRITICAL FIX) ────────────────
-// Both host and guest call this after conn is set.
-// We wait for conn.on('open') before doing ANYTHING.
-function setupConn(){
-  logA('hDbg','Waiting for data channel to open…');
-  logA('jDbg','Data channel created, waiting for open…');
+// ══════════════════════════════════════
+//  DATA CHANNEL
+// ══════════════════════════════════════
+function wireDC(channel) {
+  channel.onopen = () => {
+    setCS('y','exchanging keys…');
+    dcSend({t:'KEY', k:b64(KP.publicKey), n:myName});
+  };
 
-  conn.on('open',()=>{
-    // Data channel is OPEN — now safe to send
-    console.log('[onlyus] DATA CHANNEL OPEN');
-    logA('hDbg','Channel open! Sending public key…');
-    logA('jDbg','Channel open! Sending public key…');
-    setJS('y','Exchanging keys…');
+  channel.onmessage = e => {
+    let d; try { d=JSON.parse(e.data); } catch { return; }
+    if (!d?.t) return;
 
-    // Send my public key as a plain string to avoid serialization issues
-    const payload = JSON.stringify({
-      t:'KEY',
-      k:b64(KP.publicKey),
-      n:myName
-    });
-    conn.send(payload);
-  });
-
-  conn.on('data', raw=>{
-    // Parse — handle both string and object (different PeerJS serialization modes)
-    let d;
-    try{ d = typeof raw==='string' ? JSON.parse(raw) : raw; }
-    catch(e){ console.error('parse error',e); return; }
-
-    if(!d||!d.t) return;
-    console.log('[onlyus] data received, type:', d.t);
-
-    if(d.t==='KEY'){
-      try{
-        SK=buildSK(d.k,PH);
-        logA('hDbg','Keys exchanged ✦ launching chat');
-        logA('jDbg','Keys exchanged ✦ launching chat');
-        launchChat();
-        setCS('g','encrypted · connected');
-        addSys('Connected ✦ E2E encrypted');
-      }catch(e){
-        console.error('key exchange error',e);
-        toast('Key error — make sure passphrase matches on both sides');
+    if (d.t==='KEY') {
+      try {
+        SK = buildSK(d.k, PH);
+        peerName = d.n || 'Them';
+        // Send a verification ping encrypted with our derived key
+        // If the other side decrypts it successfully → passphrases match
+        dcSend({ t:'VERIFY', d:encT('onlyus-verify-ok') });
+      } catch {
+        showWrongPw();
+        setCS('r','key error');
       }
       return;
     }
-    if(!SK) return;
-    if(d.t==='MSG'){const p=dec(d.d);if(p!==null)addMsg(p,'them');return;}
-    if(d.t==='IMG'){const b=decB(d.d);if(b)addImg(URL.createObjectURL(new Blob([b],{type:d.m||'image/jpeg'})),'them');}
-  });
 
-  conn.on('close',()=>{setCS('rd','disconnected');addSys('Session ended');});
-  conn.on('error',e=>{console.error('conn error',e);setCS('rd','error: '+e.type);});
+    // VERIFICATION — decrypt and confirm passphrase match
+    if (d.t==='VERIFY') {
+      const check = SK ? decT(d.d) : null;
+      if (check === 'onlyus-verify-ok') {
+        // Passphrases match ✦
+        cancelWipe(); launchChat();
+        setCS('g','encrypted · connected');
+        addSys('Connected ✦ PBKDF2-256 + X25519 + XSalsa20-Poly1305 active');
+      } else {
+        // Decryption failed = wrong passphrase
+        SK = null;
+        showWrongPw();
+        setCS('r','wrong passphrase');
+        dcSend({ t:'WRONG_PW' }); // tell other side too
+      }
+      return;
+    }
+
+    // Other side detected wrong passphrase
+    if (d.t==='WRONG_PW') {
+      SK = null;
+      showWrongPw();
+      setCS('r','wrong passphrase');
+      return;
+    }
+
+    if (!SK) return;
+
+    if (d.t==='RECONN_REQ') { showReconnFrom(d.n||'Them'); return; }
+    if (d.t==='RECONN_OK')  { toast('Reconnect accepted ✦'); hideReconn(); return; }
+    if (d.t==='RECONN_NO')  { toast('Reconnect declined'); return; }
+
+    if (d.t==='MSG') {
+      const p = decT(d.d);
+      if (p !== null) addMsg(p,'them');
+      else addSys('⚠️ Message could not be decrypted');
+      return;
+    }
+    if (d.t==='IMG') {
+      const b = decBin(d.d);
+      if (b) addImgMsg(URL.createObjectURL(new Blob([b],{type:d.m||'image/jpeg'})),'them');
+      else addSys('⚠️ Photo could not be decrypted');
+    }
+  };
+
+  channel.onclose = () => {
+    setCS('r','disconnected');
+    addSys(peerName+' left the room');
+    SK=null; roomLocked=false;
+    G('bellWrap').classList.add('on');
+    scheduleWipe();
+  };
+
+  channel.onerror = () => { setCS('r','channel error'); toast('Connection error'); };
 }
 
-// ─── SEND ────────────────────────────────────────────
-function sendMsg(){
-  const el=G('mi'),txt=el.value.trim();
-  if(!txt)return;
-  if(!rdy()){toast('Not connected yet');return;}
-  conn.send(JSON.stringify({t:'MSG',d:enc(txt)}));
-  addMsg(txt,'me'); el.value=''; el.style.height='auto';
+function dcSend(obj) {
+  if (dc?.readyState==='open') dc.send(JSON.stringify(obj));
 }
-function sendImg(e){
-  const f=e.target.files[0]; if(!f)return;
-  if(!rdy()){toast('Not connected');return;}
-  if(f.size>8*1024*1024){toast('Max 8MB');return;}
-  const r=new FileReader();
-  r.onload=ev=>{
-    const bytes=new Uint8Array(ev.target.result);
-    conn.send(JSON.stringify({t:'IMG',d:encB(bytes),m:f.type}));
-    addImg(URL.createObjectURL(f),'me');
+
+// ══════════════════════════════════════
+//  SEND
+// ══════════════════════════════════════
+function sendMsg() {
+  const el=G('msgIn'), txt=el.value.trim();
+  if (!txt) return;
+  if (!rdy()) { toast('Not connected — wait for green dot'); return; }
+  dcSend({t:'MSG', d:encT(txt)});
+  addMsg(txt,'me');
+  el.value=''; el.style.height='auto';
+}
+
+function onFile(e) {
+  const f = e.target.files[0]; if (!f) return;
+  if (!rdy()) { toast('Not connected yet'); return; }
+  if (f.size > 8*1024*1024) { toast('Max 8MB per image'); return; }
+  const r = new FileReader();
+  r.onload = ev => {
+    const bytes = new Uint8Array(ev.target.result);
+    dcSend({t:'IMG', d:encBin(bytes), m:f.type});
+    addImgMsg(URL.createObjectURL(f),'me');
     toast('Photo sent ✦');
   };
-  r.readAsArrayBuffer(f); e.target.value='';
+  r.readAsArrayBuffer(f);
+  e.target.value='';
 }
-function rdy(){return !!(conn&&conn.open&&SK);}
 
-// ─── VIDEO ───────────────────────────────────────────
-async function toggleCam(){
-  if(!camOn){
-    try{
-      stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
-      G('locV').srcObject=stream; camOn=true; micOn=true;
-      G('vwrap').classList.add('on'); G('voff').style.display='none';
-      G('camBtn').classList.add('on'); G('micBtn').classList.add('on');
-      if(conn&&conn.open){vcall=peer.call(conn.peer,stream);vcall.on('stream',s=>setRemote(s));}
-      toast('Video on · encrypted');
-    }catch(e){toast('Camera denied');}
+function rdy() { return !!(dc?.readyState==='open' && SK); }
+
+// ══════════════════════════════════════
+//  VIDEO
+// ══════════════════════════════════════
+async function toggleCam() {
+  if (!camOn) {
+    try {
+      mediaStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+      G('locVid').srcObject = mediaStream;
+      camOn=true; micOn=true;
+      G('vidWrap').classList.add('on');
+      G('vidOff').style.display='none';
+      G('btnCam').classList.add('on');
+      G('btnMic').classList.add('on');
+      if (pc?.signalingState !== 'closed')
+        mediaStream.getTracks().forEach(t => pc.addTrack(t, mediaStream));
+      toast('Video on · DTLS-SRTP encrypted');
+      wakeLock();
+    } catch { toast('Camera denied — allow in browser settings'); }
   } else {
-    camOn=!camOn;
-    stream&&stream.getVideoTracks().forEach(t=>t.enabled=camOn);
-    G('camBtn').classList.toggle('on',camOn);
-    toast(camOn?'Camera on':'Camera off');
+    camOn = !camOn;
+    mediaStream?.getVideoTracks().forEach(t => t.enabled=camOn);
+    G('btnCam').classList.toggle('on', camOn);
+    toast(camOn ? 'Camera on' : 'Camera off');
   }
 }
-function answerCall(c){
-  const ans=s=>{vcall=c;c.answer(s);c.on('stream',r=>setRemote(r));};
-  if(stream){ans(stream);return;}
-  navigator.mediaDevices.getUserMedia({video:true,audio:true}).then(s=>{
-    stream=s;G('locV').srcObject=s;camOn=true;micOn=true;
-    G('vwrap').classList.add('on');G('voff').style.display='none';
-    G('camBtn').classList.add('on');G('micBtn').classList.add('on');ans(s);
-  }).catch(()=>c.answer());
-}
-function setRemote(s){G('remV').srcObject=s;G('vwrap').classList.add('on');G('voff').style.display='none';}
-function toggleMic(){
-  if(!stream){toast('Start camera first');return;}
-  micOn=!micOn; stream.getAudioTracks().forEach(t=>t.enabled=micOn);
-  G('micBtn').classList.toggle('on',micOn); toast(micOn?'Mic on':'Mic muted');
+
+function toggleMic() {
+  if (!mediaStream) { toast('Start camera first'); return; }
+  micOn = !micOn;
+  mediaStream.getAudioTracks().forEach(t => t.enabled=micOn);
+  G('btnMic').classList.toggle('on', micOn);
+  toast(micOn ? 'Mic on' : 'Mic muted 🔇');
 }
 
-// ─── CHAT UI ─────────────────────────────────────────
-function launchChat(){G('setup').style.display='none';G('chat').classList.add('on');scrollB();}
-function addMsg(txt,who){
-  const w=document.createElement('div'); w.className='mw '+who;
-  w.innerHTML=`<div class="bub">${esc(txt)}</div><div class="mt">${now()}</div><div class="et">⬡ encrypted</div>`;
-  G('msgs').appendChild(w); scrollB();
+// ══════════════════════════════════════
+//  RECONNECT
+// ══════════════════════════════════════
+function sendReconnReq() {
+  if (rdy()) { dcSend({t:'RECONN_REQ',n:myName}); toast('Reconnect request sent'); }
+  else { isHost ? hostFlow() : joinFlow(); toast('Attempting reconnect…'); }
 }
-function addImg(url,who){
-  const w=document.createElement('div'); w.className='mw '+who;
-  const b=document.createElement('div'); b.className='bub'; b.style.padding='.28rem';
-  const img=document.createElement('img'); img.src=url; img.loading='lazy'; img.onclick=()=>openLB(url);
+function showReconnFrom(name) {
+  G('reconnSub').textContent = name+' wants to reconnect';
+  G('reconnPopup').classList.add('on');
+}
+function hideReconn() { G('reconnPopup').classList.remove('on'); }
+function acceptReconn() { dcSend({t:'RECONN_OK',n:myName}); hideReconn(); toast('Accepted ✦'); }
+
+// ══════════════════════════════════════
+//  KEY WIPE
+// ══════════════════════════════════════
+function scheduleWipe() {
+  clearTimeout(wipeTimer);
+  wipeTimer = setTimeout(() => {
+    fullWipe();
+    addSys('⚠️ Session expired — all keys wiped. Refresh to start again.');
+    setCS('r','keys wiped');
+  }, 60000);
+}
+function cancelWipe() { clearTimeout(wipeTimer); wipeTimer=null; }
+
+function fullWipe() {
+  cancelWipe();
+  if (SK) { SK.fill(0); SK=null; }
+  if (PH) { PH.fill(0); PH=null; }
+  if (KP) { KP.secretKey.fill(0); KP.publicKey.fill(0); KP=null; }
+  roomCode=''; peerName=''; roomLocked=false; pendingICE=[];
+  G('msgList').innerHTML='';
+  G('bellWrap').classList.remove('on');
+  mediaStream?.getTracks().forEach(t=>t.stop()); mediaStream=null;
+  camOn=false; micOn=false;
+  G('vidWrap').classList.remove('on');
+  G('btnCam').classList.remove('on');
+  G('btnMic').classList.remove('on');
+  try{dc?.close();}catch{} dc=null;
+  try{pc?.close();}catch{} pc=null;
+}
+
+function endSess() {
+  if (!confirm('End session? All keys and messages will be permanently wiped.')) return;
+  fullWipe(); location.reload();
+}
+
+function cleanup() {
+  try{dc?.close();}catch{} dc=null;
+  try{pc?.close();}catch{} pc=null;
+  pendingICE=[]; roomLocked=false;
+}
+
+// ══════════════════════════════════════
+//  CHAT UI
+// ══════════════════════════════════════
+function launchChat() {
+  G('vSetup').classList.remove('on');
+  G('vChat').classList.add('on');
+  G('bellWrap').classList.remove('on');
+  scrollB();
+}
+
+function addMsg(txt, who) {
+  const w = mk('div','mw '+who);
+  w.innerHTML = `<div class="bub">${esc(txt)}</div>
+    <div class="msg-time">${now()}</div>
+    <div class="msg-enc">⬡ encrypted</div>`;
+  G('msgList').appendChild(w); scrollB();
+}
+
+function addImgMsg(url, who) {
+  const w=mk('div','mw '+who);
+  const b=mk('div','bub'); b.style.padding='.3rem';
+  const img=mk('img'); img.src=url; img.loading='lazy';
+  img.onclick = () => showLB(url);
   b.appendChild(img); w.appendChild(b);
-  w.innerHTML+=`<div class="mt">${now()}</div><div class="et">⬡ photo encrypted</div>`;
-  G('msgs').appendChild(w); scrollB();
+  w.innerHTML += `<div class="msg-time">${now()}</div><div class="msg-enc">⬡ photo encrypted</div>`;
+  G('msgList').appendChild(w); scrollB();
 }
-function addSys(txt){const d=document.createElement('div');d.className='sys';d.textContent=txt;G('msgs').appendChild(d);scrollB();}
-function scrollB(){const m=G('msgs');setTimeout(()=>m.scrollTop=m.scrollHeight,50);}
-function now(){return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
-function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
-function G(id){return document.getElementById(id);}
-function setCS(c,t){G('cDot').className='dot '+(c==='g'?'g':c==='rd'?'rd':'y');G('cTxt').textContent=t;}
-function setHS(c,t){G('hDot').className='dot '+(c==='g'?'g':c==='rd'?'rd':'y');G('hTxt').textContent=t;}
-function setJS(c,t){G('jDot').className='dot '+(c==='g'?'g':c==='rd'?'rd':'y');G('jTxt').textContent=t;}
-function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
-function rsz(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,96)+'px';}
-function openLB(url){G('lbi').src=url;G('lb').classList.add('on');}
-function closeLB(){G('lb').classList.remove('on');}
-function endSess(){
-  if(!confirm('End session?'))return;
-  if(vcall)vcall.close(); if(conn)conn.close(); if(peer)peer.destroy();
-  if(stream)stream.getTracks().forEach(t=>t.stop());
-  SK=null;PH=null;KP=null; location.reload();
-}
-let _tt;
-function toast(msg){const t=G('toast');t.textContent=msg;t.classList.add('on');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('on'),3000);}
 
-// Android no zoom
+function addSys(txt) {
+  const d=mk('div','sys-msg'); d.textContent=txt;
+  G('msgList').appendChild(d); scrollB();
+}
+
+function scrollB() {
+  const m=G('msgList');
+  setTimeout(()=>m.scrollTop=m.scrollHeight, 50);
+}
+
+function setCS(c,t) {
+  G('cDot').className = 'sdot '+(c==='g'?'g':c==='r'?'r':'y');
+  G('cLbl').textContent = t;
+}
+
+function hStep(n,s) { for(let i=1;i<=4;i++) G('hs'+i).className='step '+(i<n?'sd':i===n?'s'+s:''); }
+function jStep(n,s) { for(let i=1;i<=4;i++) G('js'+i).className='step '+(i<n?'sd':i===n?'s'+s:''); }
+function onKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();} }
+function grow(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,100)+'px'; }
+function showInfo() { G('infoM').classList.add('on'); }
+function hideInfo() { G('infoM').classList.remove('on'); }
+function showWrongPw() { G('wrongPwM').classList.add('on'); }
+function hideWrongPw() {
+  G('wrongPwM').classList.remove('on');
+  // Go back to setup so they can re-enter passphrase
+  if (G('vChat').classList.contains('on')) {
+    fullWipe(); location.reload();
+  }
+}
+function showLB(url) { G('lbImg').src=url; G('lb').classList.add('on'); }
+function hideLB() { G('lb').classList.remove('on'); }
+
+// ══════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════
+let toastT;
+function toast(msg) {
+  const t=G('toast'); t.textContent=msg; t.classList.add('on');
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('on'),3000);
+}
+
+// ══════════════════════════════════════
+//  ANTI-SCREENSHOT
+// ══════════════════════════════════════
+let scT;
+function showSC() {
+  G('scBlock').classList.add('on');
+  clearTimeout(scT); scT=setTimeout(()=>G('scBlock').classList.remove('on'),3000);
+}
+document.addEventListener('visibilitychange',()=>{
+  document.body.classList.toggle('blurred', document.hidden);
+});
+document.addEventListener('keydown', e => {
+  const ss = e.key==='PrintScreen' ||
+    (e.metaKey&&e.shiftKey&&['3','4','5','s'].includes(e.key.toLowerCase()));
+  if (ss) { e.preventDefault(); showSC(); toast('📵 Screenshot blocked'); }
+});
+if (navigator.mediaDevices?.getDisplayMedia) {
+  navigator.mediaDevices.getDisplayMedia = async () => {
+    showSC(); toast('📵 Screen recording blocked');
+    throw new DOMException('Blocked','NotAllowedError');
+  };
+}
+document.addEventListener('contextmenu', e => {
+  if (G('vChat').classList.contains('on')) e.preventDefault();
+});
+
+// ══════════════════════════════════════
+//  WAKE LOCK
+// ══════════════════════════════════════
+async function wakeLock() {
+  try { if('wakeLock' in navigator) await navigator.wakeLock.request('screen'); } catch {}
+}
+document.addEventListener('visibilitychange',()=>{
+  if (document.visibilityState==='visible'&&camOn) wakeLock();
+});
+
+// ══════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════
+function G(id) { return document.getElementById(id); }
+function mk(t,c) { const e=document.createElement(t); if(c)e.className=c; return e; }
+function now() { return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
+function wait(ms) { return new Promise(r=>setTimeout(r,ms)); }
+function esc(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+
+// Android double-tap fix
+// Double-tap zoom fix — ONLY block on non-interactive elements
 let lt=0;
-document.addEventListener('touchend',e=>{const n=Date.now();if(n-lt<280)e.preventDefault();lt=n;},{passive:false});
+document.addEventListener('touchend', e=>{
+  const tag = e.target.tagName;
+  const isInteractive = ['BUTTON','INPUT','TEXTAREA','A','SELECT','LABEL'].includes(tag)
+    || e.target.closest('button,input,textarea,a,select,label');
+  if (isInteractive) return; // never block buttons/inputs
+  const n=Date.now(); if(n-lt<280) e.preventDefault(); lt=n;
+}, {passive:false});
+
+// Back button
 history.pushState({},'');
 window.addEventListener('popstate',()=>{
-  if(G('lb').classList.contains('on')){closeLB();return;}
-  if(G('infoM').classList.contains('on')){G('infoM').classList.remove('on');}
+  if(G('lb').classList.contains('on'))         { hideLB(); return; }
+  if(G('infoM').classList.contains('on'))      { hideInfo(); return; }
+  if(G('reconnPopup').classList.contains('on')){ hideReconn(); return; }
 });
 </script>
 </body>
