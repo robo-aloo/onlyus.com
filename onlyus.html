@@ -90,6 +90,7 @@ body.blurred #app { filter: blur(24px); transition: filter .1s; }
 .pw-row .inp { flex: 1; }
 /* Eye button — big touch target, clearly tappable */
 .eye-btn {
+  touch-action: manipulation;
   flex-shrink: 0;
   width: 44px; height: 44px;
   background: var(--inp); border: 1.5px solid var(--bor);
@@ -121,6 +122,7 @@ body.blurred #app { filter: blur(24px); transition: filter .1s; }
 
 /* BUTTONS */
 .btn {
+  touch-action: manipulation;
   display: block; width: 100%; padding: .76rem;
   border: none; border-radius: var(--rad2);
   font-family: inherit; font-size: .9rem; font-weight: 500;
@@ -183,6 +185,7 @@ body.blurred #app { filter: blur(24px); transition: filter .1s; }
 
 /* ICON BUTTONS — all given explicit tap area and z-index */
 .ic-btn {
+  touch-action: manipulation;
   width: 36px; height: 36px; border-radius: 50%;
   background: var(--inp); border: 1.5px solid var(--bor);
   color: var(--sub); cursor: pointer;
@@ -261,6 +264,7 @@ body.blurred #app { filter: blur(24px); transition: filter .1s; }
 #msgIn:focus { border-color: var(--a); }
 #msgIn::placeholder { color: var(--sub); }
 .send-btn {
+  touch-action: manipulation;
   width: 38px; height: 38px; flex-shrink: 0; border-radius: 50%;
   background: linear-gradient(135deg, var(--a), #7460f0); border: none;
   color: #fff; font-size: .88rem; cursor: pointer;
@@ -270,6 +274,7 @@ body.blurred #app { filter: blur(24px); transition: filter .1s; }
 }
 .send-btn:active { transform: scale(.88); }
 .attach-btn {
+  touch-action: manipulation;
   width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%;
   background: var(--inp); border: 1.5px solid var(--bor);
   color: var(--sub); font-size: .82rem; cursor: pointer;
@@ -561,10 +566,15 @@ body.blurred #app { filter: blur(24px); transition: filter .1s; }
 // ══════════════════════════════════════
 const CF_URL = (() => {
   const q = new URLSearchParams(location.search).get('cf');
-  if (q) return q;
-  const saved = localStorage.getItem('onlyus_cf_url');
-  if (saved) return saved;
-  return `${location.origin}/api/signal`;
+  if (q) {
+    try { localStorage.setItem('onlyus_cf_url', q); } catch {}
+    return q;
+  }
+  try {
+    const saved = localStorage.getItem('onlyus_cf_url');
+    if (saved) return saved;
+  } catch {}
+  return '/api/signal';
 })();
 
 // ══════════════════════════════════════
@@ -638,7 +648,7 @@ async function deriveKey(pw) {
   );
   kdfUI(true, 22); await wait(10);
   const bits = await crypto.subtle.deriveBits(
-    { name:'PBKDF2', hash:'SHA-512', salt:KDF_SALT, iterations:600000 }, mat, 256
+    { name:'PBKDF2', hash:'SHA-512', salt:KDF_SALT, iterations:220000 }, mat, 256
   );
   kdfUI(true, 100); await wait(80);
   kdfUI(false, 0);
@@ -704,10 +714,17 @@ function toggleEye() {
   try { const l=inp.value.length; inp.setSelectionRange(l,l); } catch {}
 }
 
-// Single listener — handles both mouse and touch cleanly
-G('eyeBtn').addEventListener('pointerdown', e => {
-  e.preventDefault(); // stops focus leaving the input
+// Robust listeners for mobile + desktop
+const eyeBtn = G('eyeBtn');
+eyeBtn.addEventListener('click', e => {
+  e.preventDefault();
   toggleEye();
+});
+eyeBtn.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    toggleEye();
+  }
 });
 
 function onPassInput(pw) {
